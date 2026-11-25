@@ -77,6 +77,9 @@ section{padding:clamp(72px,10vw,128px) 0}
 .plan-c h3{font-size:26px}
 .price{font:600 clamp(34px,3.6vw,46px)/1 "Reem Kufi",sans-serif;white-space:nowrap}
 .price small{font:500 15px "IBM Plex Sans Arabic",sans-serif;color:var(--soft);margin-inline-start:6px}
+.price s{font-size:.62em;color:var(--line);text-decoration:line-through 3px var(--sun);margin-inline-end:12px}
+.total s{color:var(--line);margin-inline-start:8px}
+.offer{display:inline-block;margin-inline-start:10px;padding:3px 12px;border-radius:999px;background:var(--sun);color:#fff;font-weight:600;font-size:14px;vertical-align:2px}
 .total{margin-top:10px;font-size:15.5px;color:var(--soft)}
 .total b{color:var(--ink);font-weight:600;font-size:18px}
 .plan-c ul{list-style:none;margin:20px 0 0;padding:0;border-top:1px solid var(--rule)}
@@ -167,7 +170,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <section class="pk" id="packages"><div class="wrap">
     <div class="sec-h">
       <h2>الباقات</h2>
-      <p>السعر لكل متر مربع من مسطح البناء.</p>
+      <p>السعر لكل متر مربع من مسطح البناء.<span class="offer">عرض الإطلاق: خصم حتى ٥٠٪</span></p>
     </div>
     <div class="calc">
       <label for="area">مسطح البناء</label>
@@ -176,8 +179,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <div class="plans">
       <article class="plan-c">
         <img src="home/room_empty.jpg" alt="مجلس مشطّب بلا أثاث" loading="lazy">
-        <div class="head"><h3>بدون أثاث</h3><div class="price">٢<small>ريال / م²</small></div></div>
-        <p class="total">لمسطح <span data-area>٦٠٠</span> م²: <b data-total="2">١٬٢٠٠ ريال</b></p>
+        <div class="head"><h3>بدون أثاث</h3><div class="price"><s aria-label="بدل">٢</s>١<small>ريال / م²</small></div></div>
+        <p class="total">لمسطح <span data-area>٦٠٠</span> م²: <b data-total="1">٦٠٠ ريال</b><s data-was="2">١٬٢٠٠ ريال</s></p>
         <ul>
           <li>نموذج مطابق لمخططات المعماري بمقاساتها</li>
           <li>خامات حقيقية للأرضيات والجدران والواجهات</li>
@@ -189,8 +192,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       </article>
       <article class="plan-c full">
         <img src="home/room_full.jpg" alt="المجلس نفسه مؤثثًا" loading="lazy">
-        <div class="head"><h3>مع الأثاث</h3><div class="price">٣<small>ريال / م²</small></div></div>
-        <p class="total">لمسطح <span data-area>٦٠٠</span> م²: <b data-total="3">١٬٨٠٠ ريال</b></p>
+        <div class="head"><h3>مع الأثاث</h3><div class="price"><s aria-label="بدل">٣</s>٢<small>ريال / م²</small></div></div>
+        <p class="total">لمسطح <span data-area>٦٠٠</span> م²: <b data-total="2">١٬٢٠٠ ريال</b><s data-was="3">١٬٨٠٠ ريال</s></p>
         <ul>
           <li>كل ما في باقة بدون أثاث</li>
           <li class="plus">أثاث لكل الغرف حسب مخطط الأثاث</li>
@@ -223,7 +226,7 @@ if(!matchMedia('(prefers-reduced-motion:reduce)').matches){ // حركة واحد
 // حاسبة الباقات
 const AR='٠١٢٣٤٥٦٧٨٩', ar=n=>Math.round(n).toLocaleString('en-US').replace(/\d/g,d=>AR[d]).replace(/,/g,'٬');
 const area=document.getElementById('area');
-const calc=()=>{ const a=Math.max(0,+area.value||0); document.querySelectorAll('[data-area]').forEach(e=>e.textContent=ar(a)); document.querySelectorAll('[data-total]').forEach(e=>e.textContent=ar(a*+e.dataset.total)+' ريال'); };
+const calc=()=>{ const a=Math.max(0,+area.value||0); document.querySelectorAll('[data-area]').forEach(e=>e.textContent=ar(a)); document.querySelectorAll('[data-total]').forEach(e=>e.textContent=ar(a*+e.dataset.total)+' ريال'); document.querySelectorAll('[data-was]').forEach(e=>e.textContent=ar(a*+e.dataset.was)+' ريال'); };
 area.addEventListener('input',calc); calc();
 </script>
 </body>
