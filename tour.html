@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>الفيلا: جولة كاملة</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/", "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.8/build/index.module.js" } }
+</script>
+<style>
+:root{--ink:#1d2230;--soft:#6b7284;--sun:#ff7a1a}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Reem Kufi","Segoe UI",Tahoma,sans-serif;color:var(--ink);background:#f1f2f6;overflow:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--sun);outline-offset:4px;border-radius:2px}
+
+/* ---- الافتتاح: الفيلا من الجو ---- */
+#intro{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;justify-content:flex-end;padding:clamp(24px,6vw,76px);color:#fff;background:linear-gradient(0deg,rgba(9,10,14,.62),rgba(9,10,14,0) 46%);transition:opacity .9s}
+#intro.gone{opacity:0;pointer-events:none}
+#intro h1{margin:0;font-size:clamp(46px,8.4vw,118px);font-weight:500;line-height:1.02;text-shadow:0 2px 34px rgba(0,0,0,.45)}
+#intro p{margin:14px 0 0;font-size:clamp(17px,1.7vw,22px);max-width:30em;line-height:1.7;text-shadow:0 1px 14px rgba(0,0,0,.6)}
+#enter{align-self:flex-start;margin-top:24px;font-size:19px;font-weight:500;padding:13px 34px;border-radius:999px;background:#fff;color:var(--ink);transition:transform .2s,opacity .3s}
+#enter[disabled]{opacity:.55;cursor:default}
+#enter:not([disabled]):hover{transform:translateY(-1px)}
+
+/* ---- داخل البيت ---- */
+#view{position:fixed;inset:0;background:#0e1016;opacity:0;transition:opacity .9s}
+#view.on{opacity:1}
+canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;outline:none}
+canvas#c:active{cursor:grabbing}
+.veil{position:absolute;inset:0;background:#07080c;opacity:0;pointer-events:none;transition:opacity .38s}
+.veil.on{opacity:1}
+.hud{position:absolute;pointer-events:none;color:#fff;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+.where{top:clamp(16px,3.5vh,34px);inset-inline-start:clamp(18px,4vw,48px)}
+.where b{display:block;font-size:clamp(22px,2.6vw,34px);font-weight:500;line-height:1.2}
+.where span{display:block;font-size:15.5px;opacity:.85;margin-top:2px}
+.where em{display:block;font-style:normal;font-size:14.5px;margin-top:10px;opacity:0;transition:opacity .6s}
+.where em.on{opacity:.9}
+.ctl{position:absolute;top:clamp(20px,4vh,40px);inset-inline-end:clamp(18px,4vw,48px);display:flex;gap:clamp(16px,2.4vw,30px);align-items:baseline}
+.ctl button{color:#fff;font-size:15.5px;text-shadow:0 1px 10px rgba(0,0,0,.6);box-shadow:0 1.5px 0 rgba(255,255,255,.7);padding-bottom:1px}
+.ctl button[aria-pressed="true"]{box-shadow:0 1.5px 0 var(--sun);color:#ffd9bd}
+.mini{position:absolute;inset-inline-end:clamp(14px,3vw,36px);bottom:clamp(14px,3vh,32px);width:clamp(150px,19vw,250px);background:rgba(255,255,255,.93);border-radius:6px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.35);direction:ltr}
+.mini img{display:block;width:100%}
+.mini i{position:absolute;width:13px;height:13px;margin:-6.5px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 3px rgba(255,122,26,.3)}
+.mini i::after{content:"";position:absolute;left:50%;top:50%;width:0;height:0;border:5px solid transparent;border-bottom:11px solid var(--sun);transform:translate(-50%,-150%)}
+.mini em{position:absolute;inset-inline-start:8px;top:5px;font-style:normal;font-size:13px;color:var(--ink);direction:rtl}
+.tip{left:50%;bottom:clamp(18px,4vh,40px);transform:translateX(-50%);font-size:15.5px;white-space:nowrap;transition:opacity .8s}
+.tip.off{opacity:0}
+.lift{position:absolute;left:50%;bottom:clamp(54px,10vh,96px);transform:translate(-50%,12px);display:flex;gap:10px;align-items:center;color:#fff;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s;direction:rtl}
+.lift.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.lift span{font-size:15.5px;text-shadow:0 1px 10px rgba(0,0,0,.7);margin-inline-end:6px}
+.lift button{font-size:15.5px;padding:8px 18px;border-radius:999px;background:rgba(14,16,22,.62);border:1px solid rgba(255,255,255,.55);color:#fff;backdrop-filter:blur(6px)}
+.lift button:hover{background:rgba(255,255,255,.92);color:var(--ink)}
+.snap{position:absolute;left:50%;bottom:calc(clamp(54px,10vh,96px) + 58px);transform:translate(-50%,12px);font-size:15.5px;padding:8px 20px;border-radius:999px;background:rgba(14,16,22,.62);border:1px solid rgba(255,255,255,.55);color:#fff;backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}
+.snap.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.snap:hover{background:rgba(255,255,255,.92);color:var(--ink)}
+.lift button[disabled]{opacity:.38;cursor:default;background:rgba(14,16,22,.4);color:#fff}
+.go{position:absolute;left:clamp(18px,5vw,48px);bottom:clamp(20px,4vh,40px);width:74px;height:74px;border-radius:50%;border:1.5px solid rgba(255,255,255,.8);color:#fff;font-size:15px;display:none;touch-action:none;background:rgba(0,0,0,.25)}
+@media (pointer:coarse){.go{display:block}.tip{display:none}}
+.pad{position:absolute;bottom:calc(clamp(22px,5vh,44px) + env(safe-area-inset-bottom));width:136px;height:136px;border-radius:50%;display:none;touch-action:none;-webkit-user-select:none;user-select:none;
+ background:radial-gradient(circle,rgba(16,18,24,.5) 0 56%,rgba(16,18,24,.3) 57% 100%);border:1.5px solid rgba(255,255,255,.32);box-shadow:inset 0 3px 12px rgba(0,0,0,.55),0 8px 22px rgba(0,0,0,.3)}
+.pad.l{left:max(20px,env(safe-area-inset-left))}.pad.r{right:max(20px,env(safe-area-inset-right))}
+.pad i{position:absolute;left:50%;top:50%;width:66px;height:66px;margin:-33px 0 0 -33px;border-radius:50%;transition:transform .14s ease-out;
+ background:radial-gradient(circle at 50% 38%,#43464f 0 24%,#2a2c33 25% 62%,#1b1c21 63%);box-shadow:0 5px 12px rgba(0,0,0,.6),inset 0 0 0 3px rgba(255,255,255,.07),inset 0 -4px 7px rgba(0,0,0,.55)}
+.pad i::before{content:'';position:absolute;inset:9px;border-radius:50%;background:repeating-radial-gradient(circle,rgba(255,255,255,.08) 0 1px,transparent 1px 4px)}
+.pad.on i{transition:none}.pad.on{border-color:rgba(255,255,255,.6)}
+@media (pointer:coarse){.go,.mini{display:none!important}.pad{display:block}}
+.load{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:18px;background:#0e1016;transition:opacity .8s}
+.load.off{opacity:0;pointer-events:none}
+@media (max-width:760px){#pick{grid-template-columns:1fr;grid-template-rows:auto 1fr}.intro{gap:14px}.sel span{min-height:0}.lift span{display:none}.lift button{padding:8px 13px}.where{top:calc(clamp(20px,4vh,40px) + 46px)}.lift{bottom:calc(clamp(14px,3vh,32px) + 150px)}.snap{bottom:calc(clamp(14px,3vh,32px) + 206px)}}
+@media (prefers-reduced-motion:reduce){.veil,.lift,.snap,#view,#pick{transition-duration:.01s}}
+.feat{position:absolute;top:calc(clamp(20px,4vh,40px) + 36px);inset-inline-end:clamp(18px,4vw,48px);display:flex;gap:8px}
+.feat button{color:#fff;font-size:14px;padding:6px 13px;border-radius:999px;background:rgba(14,16,22,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.feat button[aria-pressed="true"]{background:rgba(250,248,244,.95);color:var(--ink);text-shadow:none}
+.sheet{position:absolute;top:calc(clamp(20px,4vh,40px) + 82px);inset-inline-end:clamp(18px,4vw,48px);width:min(372px,calc(100vw - 36px));max-height:calc(100vh - 140px);overflow:auto;background:rgba(250,248,244,.95);color:var(--ink);border-radius:14px;padding:14px 16px;box-shadow:0 14px 44px rgba(0,0,0,.34);display:none;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.sheet.on{display:block}
+.sheet .row{display:flex;align-items:center;gap:11px;padding:7px 0}
+.sheet .row+.row{border-top:1px solid rgba(29,34,48,.08)}
+.sheet .row>i{width:11px;height:11px;border-radius:50%;flex:none}
+.sheet .row>div{flex:1;display:flex;flex-direction:column;line-height:1.4}
+.sheet .row b{font-weight:600;font-size:15px}.sheet .row span{font-size:12.5px;color:var(--soft)}
+.sheet .row button{font-size:13.5px;padding:5px 13px;border-radius:999px;border:1px solid rgba(29,34,48,.22)}
+.sheet .chips{display:flex;flex-wrap:wrap;gap:6px}
+.sheet .chips button{font-size:13.5px;padding:6px 12px;border-radius:999px;background:rgba(29,34,48,.07)}
+.sheet .chips button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.sheet p{margin:10px 0 0;font-size:13.5px;line-height:1.65}
+.sheet .lbl{margin:0 0 9px;font-size:13px;color:var(--soft)}
+.sheet .sw{display:flex;flex-wrap:wrap;gap:12px 10px;margin-bottom:18px}
+.sheet .sw button{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--soft);width:44px}
+.sheet .sw button i{width:32px;height:32px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+.sheet .sw button[aria-pressed="true"] i{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
+.sheet .sw button[aria-pressed="true"]{color:var(--ink)}
+.sheet .sw[aria-disabled="true"]{opacity:.35;pointer-events:none}
+.sheet .legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:12px;color:var(--soft)}
+.sheet .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-inline-end:5px;vertical-align:-1px}
+.legend .r{background:#e5484d}.legend .a{background:#f0a030}.legend .n{background:#8aa0b8}.legend .g{background:#3fb68b}
+.sheet strong{font-weight:600}
+@media (max-width:760px){.feat{top:auto;bottom:calc(clamp(22px,5vh,44px) + env(safe-area-inset-bottom));inset-inline-end:auto;right:max(20px,env(safe-area-inset-right));flex-direction:column;align-items:flex-end}
+ .sheet{top:auto;bottom:calc(clamp(22px,5vh,44px) + 132px + env(safe-area-inset-bottom));inset-inline-end:auto;left:18px;right:18px;width:auto;max-height:50vh}}
+</style>
+</head>
+<body>
+
+<section id="intro">
+  <h1>فيلا خاصة</h1>
+  <p>أرضي وأول وملحق علوي على قطعة ٧٣٥ مترًا مربعًا، مبنية من مخططات المشروع بمقاساتها.</p>
+  <button id="enter" disabled>تجهيز الفيلا</button>
+</section>
+
+<section id="view" class="on">
+  <canvas id="c" tabindex="0" aria-label="تجول داخل البيت"></canvas>
+  <div class="veil" id="veil"></div>
+  <div class="hud where"><b id="room"></b><span id="house"></span><em id="shot">صورة بجودة كاملة. تحرّك لتكمل التجول.</em></div>
+  <div class="ctl">
+    <button id="night" aria-pressed="false">المساء</button>
+    <button id="snd" aria-pressed="true">الصوت</button>
+    <button id="back">المنظر الجوي</button>
+  </div>
+  <div class="feat" id="feat"><button id="fPath" aria-pressed="false">المسارات</button><button id="fPriv" aria-pressed="false">الخصوصية</button><button id="fFin" aria-pressed="false">الخامات</button></div>
+  <div class="sheet" id="sheet" role="dialog" aria-live="polite"></div>
+  <div class="mini" id="mini"><img id="miniImg" alt=""><i id="dot"></i><em id="miniT"></em></div>
+  <div class="hud tip" id="tip">امشِ بالأسهم أو W A S D، واسحب للنظر حولك</div>
+  <button class="snap" id="snap">شاهد الصورة</button>
+  <div class="lift" id="lift" role="group" aria-label="المصعد"><span>المصعد إلى</span></div>
+  <button class="go" id="go" aria-label="تقدّم">تقدّم</button>
+  <div class="pad l" id="padL" aria-hidden="true"><i></i></div>
+  <div class="load" id="load">تجهيز البيت</div>
+</section>
+
+<script type="module">
+const AR='٠١٢٣٤٥٦٧٨٩', ar=s=>String(s).replace(/\d/g,d=>AR[d]);
+const DIR=new URLSearchParams(location.search).get('d')||'v';
+
+/* ================= البيت ================= */
+const $=id=>document.getElementById(id);
+const introEl=$('intro'), viewEl=$('view'), loadEl=$('load'), veil=$('veil');
+let started=false, running=false, T=null;
+const SND={ctx:null,on:true};
+$('enter').onclick=()=>{ if(!T)return; try{ if(!SND.ctx){const AC=window.AudioContext||window.webkitAudioContext; if(AC)SND.ctx=new AC();} SND.ctx?.resume(); }catch(e){}
+  T.initSound(); introEl.classList.add('gone'); T.fly(); };
+$('back').onclick=()=>{ running=false; T?.ambience(false); introEl.classList.remove('gone'); T?.toAir(); };
+
+const FLOORS=[
+ {k:'g',h:.5,name:'الدور الأرضي',img:'plans/g.jpg',px:X=>(X+.6)/22,py:S=>(S+.6)/38.2},
+ {k:'f',h:4.2,name:'الدور الأول',img:'plans/f.jpg',px:X=>(X-.8)/16.4,py:S=>(S-1)/23.6},
+ {k:'r',h:7.8,name:'الملحق العلوي',img:'plans/r.jpg',px:X=>(X-.8)/16.4,py:S=>(S-1)/23.6},
+];
+const levelOf=y=>y<2.4?0:y<6?1:2;
+const NAMES={'D.KIT':'المطبخ','MAID':'غرفة العاملة','TOILET':'دورة المياه','H.W':'المغسلة','W.S.R':'مجلس النساء','M.S.R':'مجلس الرجال','FOYER':'مدخل','FAMILY AREA':'صالة العائلة','DINING ROOM':'غرفة الطعام','STORE':'مستودع','STORAGE':'مخزن','DEWANIA':'الديوانية','DRIVER':'غرفة السائق','BUFFET LAUNDRY':'البوفيه والغسيل','BEDROOM':'غرفة نوم','MASTER BEDROOM':'غرفة النوم الرئيسية','DRESSING':'غرفة الملابس','LOBBY':'الردهة','CORRIDOR':'الممر','CLOSET':'غرفة ملابس'};
+const START={x:7.8,y:.12,z:36.3,yaw:0,pitch:.02};
+const P={...START,tyaw:START.yaw,tpitch:START.pitch,bob:0}; const keys={}; let fwdHold=false, level=-1, JOY={on:false,mx:0,my:0,lx:0,ly:0};
+function reset(){Object.assign(P,START);P.tyaw=P.yaw;P.tpitch=P.pitch;P.ty=START.y;P.bob=0;level=-1;}
+
+async function boot(){
+  const THREE=await import('three'); const {GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js');
+  const {computeBoundsTree,acceleratedRaycast}=await import('three-mesh-bvh');
+  THREE.BufferGeometry.prototype.computeBoundsTree=computeBoundsTree; THREE.Mesh.prototype.raycast=acceleratedRaycast;
+  const canvas=$('c');
+  const MOBILE=matchMedia('(pointer:coarse)').matches||Math.min(innerWidth,innerHeight)<600;   // الجوال: صور بنصف الدقة وبلا مؤثرات
+  const QS=new URLSearchParams(location.search), EXPO=+(QS.get('ex')||1.27);   // AgX كما في صور Blender، فلا يتغير اللون عند الانتقال إلى وضع الصورة
+  // كرت الشاشة يحدد مستوى الجودة: الكرت المدمج والجوال يأخذان مسارًا أخف بلا مؤثرات حتى يبقى المشي سلسًا. ?q=0|1|2 يفرض المستوى
+  let GPU=''; try{ const pc=document.createElement('canvas').getContext('webgl2'), dbg=pc&&pc.getExtension('WEBGL_debug_renderer_info'); GPU=dbg?pc.getParameter(dbg.UNMASKED_RENDERER_WEBGL):''; pc?.getExtension('WEBGL_lose_context')?.loseContext(); }catch(e){}
+  const WEAK=/Intel|UHD|Iris|HD Graphics|Mali|Adreno|PowerVR|SwiftShader|llvmpipe|Basic Render/i.test(GPU)&&!/\bArc\b/i.test(GPU), QF=QS.get('q');
+  const FX=QF?QF==='2':!MOBILE&&!WEAK&&!QS.has('nofx');
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:!FX,powerPreference:'high-performance'});
+  const Q={fx:FX&&renderer.capabilities.isWebGL2,pr:Math.min(devicePixelRatio,FX||MOBILE?1.5:1.25),mirror:FX?1024:MOBILE||QF==='0'?0:512};
+  renderer.setPixelRatio(Q.pr);
+  renderer.toneMapping=THREE.AgXToneMapping; renderer.toneMappingExposure=EXPO;
+  const scene=new THREE.Scene(), cam=new THREE.PerspectiveCamera(68,1,0.05,1800); cam.rotation.order='YXZ';
+  const VER=await fetch(`${DIR}/version.json`,{cache:'no-store'}).then(r=>r.json()).then(j=>'?v='+j.v).catch(()=>'');   // يمنع خلط خبز جديد بملفات قديمة مخزنة
+  const META=await fetch(`${DIR}/meta.json${VER}`).then(r=>r.json());
+  const SHOTS=await fetch(`${DIR}/photo/index.json${VER}`).then(r=>r.ok?r.json():{}).catch(()=>({}));
+  const K=META.K||6, EK=Object.keys(META.probes), LV='gfr';
+  const tl=new THREE.TextureLoader(), load=(f,srgb=true)=>new Promise((res,rej)=>tl.load(`${DIR}/${f}${VER}`,t=>{if(srgb)t.colorSpace=THREE.SRGBColorSpace;res(t);},undefined,rej));
+  const GROUPS=[...'gfrdx'].flatMap(l=>['arch','trim','furn','assets'].map(k=>`${l}_${k}`)).concat('site');
+  const pm=new THREE.PMREMGenerator(renderer);
+
+  /* ---- مجموعة الإضاءة: نهار أو مساء (خرائط إضاءة مخبوزة + انعكاسات + سماء) ---- */
+  const SETS={};
+  async function loadSet(mode){ if(SETS[mode])return SETS[mode]; const b=mode==='night'?'n/':'';
+    const [sky,...rest]=await Promise.all([load(b+'sky.jpg'),...EK.map(k=>load(`${b}probe_${k}.jpg`)),...GROUPS.map(g=>load(`${b}${MOBILE?'m/':''}lm_${g}.jpg`))]);
+    const env={}; EK.forEach((k,i)=>{const t=rest[i];t.mapping=THREE.EquirectangularReflectionMapping;env[k]=pm.fromEquirectangular(t).texture;t.dispose();});
+    sky.mapping=THREE.EquirectangularReflectionMapping;
+    const LM={}; GROUPS.forEach((g,i)=>{const t=rest[EK.length+i];t.flipY=false;t.channel=1;t.anisotropy=4;LM[g]=t;});
+    return SETS[mode]={sky,env,LM}; }
+
+  /* ---- خامات مصوّرة (Poly Haven, CC0): لون + تضاريس + خشونة/تظليل ---- */
+  const TXK=[...new Set(Object.values(META.mats).map(m=>m.t).filter(Boolean))], TX={};
+  const txLoad=Promise.all(TXK.flatMap(k=>['d','n','arm'].map(s=>load(`tx/${MOBILE?'m/':''}${k}_${s}.jpg`,s==='d').then(t=>{t.flipY=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=s==='d'?8:4;(TX[k]??={})[s]=t;}))));
+  const [gltf,day]=await Promise.all([new GLTFLoader().loadAsync(`${DIR}/house.glb${VER}`,e=>{if(e.total)loadEl.textContent=`تجهيز البيت ${ar(Math.round(e.loaded/e.total*100))}٪`;}),loadSet('day'),txLoad]);
+  let mode='day', S=day; scene.background=S.sky;
+
+  // انعكاس مصحَّح على حدود الدور، وإحساس بتضاريس الخامة فوق الإضاءة المخبوزة
+  const BOX={g:[[2.12,.5,.12],[16.1,3.8,23.7]],f:[[2.12,4.2,2.12],[16.1,7.4,23.7]],r:[[2.12,7.8,2.12],[16.1,11,15.5]],d:[[.12,.35,26.7],[6.7,3.35,34.7]]};
+  const HAS_NP=THREE.ShaderChunk.normal_fragment_begin.includes('nonPerturbedNormal'), REFL='reflectVec = inverseTransformDirection( reflectVec, viewMatrix );';
+  const HAS_BOX=THREE.ShaderChunk.envmap_physical_pars_fragment.includes(REFL);
+  function patch(m,ek,ibl){ const box=HAS_BOX&&BOX[ek], pp=META.probes[ek];
+    m.customProgramCacheKey=()=>`v3|${box?1:0}|${ibl?1:0}`;
+    m.onBeforeCompile=sh=>{ let fs=sh.fragmentShader, maps=THREE.ShaderChunk.lights_fragment_maps;
+      if(!ibl)maps=maps.replace('iblIrradiance += getIBLIrradiance( geometryNormal );','');
+      if(HAS_NP)maps=maps.replace('irradiance += lightMapIrradiance;','#ifdef USE_NORMALMAP_TANGENTSPACE\n vec3 rl = normalize( ( viewMatrix * vec4( 0.35, 0.75, 0.45, 0.0 ) ).xyz );\n lightMapIrradiance *= clamp( 1.0 + ( dot( normal, rl ) - dot( nonPerturbedNormal, rl ) ) * 1.3, 0.5, 1.5 );\n#endif\n irradiance += lightMapIrradiance;');
+      fs=fs.replace('#include <lights_fragment_maps>',maps);
+      if(box){ sh.uniforms.boxMin={value:new THREE.Vector3(...box[0])}; sh.uniforms.boxMax={value:new THREE.Vector3(...box[1])}; sh.uniforms.boxPos={value:new THREE.Vector3(pp[0],pp[2],pp[1])};
+        sh.vertexShader='varying vec3 vBoxW;\n'+sh.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\n vBoxW = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;');
+        fs='uniform vec3 boxMin;\nuniform vec3 boxMax;\nuniform vec3 boxPos;\nvarying vec3 vBoxW;\n'+fs.replace('#include <envmap_physical_pars_fragment>',THREE.ShaderChunk.envmap_physical_pars_fragment.replace(REFL,REFL+'\n vec3 bA = ( boxMax - vBoxW ) / reflectVec; vec3 bB = ( boxMin - vBoxW ) / reflectVec; vec3 bM = max( bA, bB );\n reflectVec = normalize( vBoxW + reflectVec * min( min( bM.x, bM.y ), bM.z ) - boxPos );')); }
+      sh.fragmentShader=fs; }; }
+  const envKey=(grp)=>'gfrd'.includes(grp[0])&&grp[1]==='_'&&!grp.endsWith('green')?grp[0]:'x';
+  const REG=[], cache={};       // كل خامة مسجلة لتبديل النهار والمساء
+  const reg=(m,ek,grp)=>{REG.push({m,ek,grp});m.envMap=S.env[ek];if(grp){m.lightMap=S.LM[grp];m.lightMapIntensity=K*Math.PI;}return m;};
+  function material(name,grp){
+    const key=name+'|'+grp; if(cache[key])return cache[key]; let m; const ek=envKey(grp);
+    if(name==='emit'||name==='led')m=new THREE.MeshBasicMaterial({color:new THREE.Color(2.2,1.75,1.25)});
+    else if(name==='glass')m=reg(new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:.13,roughness:.03,metalness:0,envMapIntensity:1.6,depthWrite:false}),ek);
+    else if(name==='curtain'){m=reg(new THREE.MeshStandardMaterial({color:new THREE.Color(.8,.78,.72),roughness:1,metalness:0,transparent:true,opacity:.66,side:THREE.DoubleSide,depthWrite:false,envMapIntensity:1.5}),'g');}   // الستارة تضاء من محيطها فتتبع النهار والمساء
+    else{ const d=META.mats[name]||{t:null,c:[.6,.6,.6],r:.8,m:0,e:.3,n:0}, t=d.t&&TX[d.t];
+      m=new THREE.MeshStandardMaterial({color:new THREE.Color().setRGB(...d.c),roughness:Math.min(d.r,t?9:1),metalness:d.m,envMapIntensity:d.e});
+      if(t){m.map=t.d;m.roughnessMap=t.arm;m.aoMap=t.arm;m.aoMapIntensity=.55;if(d.n>0){m.normalMap=t.n;m.normalScale.set(d.n,d.n);}}
+      if(name==='tv'&&grp.endsWith('_trim'))m.envMapIntensity=.03; reg(m,ek,grp); patch(m,ek,false); }
+    return cache[key]=m; }
+  const small=t=>{ if(!MOBILE||!t||!t.image||t.userData.small||Math.max(t.image.width,t.image.height)<=512)return; const k=512/Math.max(t.image.width,t.image.height), c=document.createElement('canvas');
+    c.width=Math.round(t.image.width*k); c.height=Math.round(t.image.height*k); c.getContext('2d').drawImage(t.image,0,0,c.width,c.height); t.image.close?.(); t.image=c; t.userData.small=true; t.needsUpdate=true; };
+  const solid=[], dyn=[], HEAVY=[], FAR=[], ALLG=[...GROUPS,'x_green','g_green','g_plants','x_plants','f_plants','r_plants','d_plants','far','glass','curtain'];
+  gltf.scene.updateMatrixWorld(true);
+  gltf.scene.traverse(o=>{ if(!o.isMesh)return;
+    const own=n=>n.replace(/[._]\d+$/,''), pn=o.parent?o.parent.name:'';
+    const grp=ALLG.find(g=>own(o.name)===g||o.name.startsWith(g)||pn===g||pn.startsWith(g))||o.name;
+    const g=o.geometry, src=o.material, name=src.name.replace(/\.\d+$/,''); ['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap'].forEach(k=>small(src[k]));
+    if(/^[gfr]_(furn|assets)$|^g_green$/.test(grp))HEAVY.push({o,l:LV.indexOf(grp[0]),plants:grp.endsWith('_green')});
+    if(grp.endsWith('_green')&&name.startsWith('leaf')||grp.endsWith('_green')&&name==='flower'){ const d=META.mats[name]; const lm=cache['leaf|'+name]||(cache['leaf|'+name]=reg(new THREE.MeshStandardMaterial({color:new THREE.Color().setRGB(...d.c),roughness:.6,side:THREE.DoubleSide,envMapIntensity:2.3}),'x')); o.material=lm; return; }
+    if(grp.endsWith('_green')){ const d=META.mats[name]; const t=TX[d.t], m=cache['bark']||(cache['bark']=reg(new THREE.MeshStandardMaterial({color:new THREE.Color().setRGB(...d.c),map:t.d,roughness:.95,envMapIntensity:2}),'x')); o.material=m; return; }
+    if(grp==='far'){ const d=META.mats[name], t=d.t&&TX[d.t], key='far|'+name; let m=cache[key]; if(!m){ m=new THREE.MeshBasicMaterial({color:new THREE.Color().setRGB(...d.c).multiplyScalar(2.9),map:t?t.d:null}); m.userData.base=m.color.clone(); FAR.push(m); cache[key]=m; } o.material=m; if(name==='walk'){g.computeBoundsTree();solid.push(o);} return; }
+    if(grp.endsWith('_plants')){ src.envMapIntensity=2.2; src.side=THREE.DoubleSide; reg(src,envKey(grp)); return; }          // النبات يضاء من محيطه
+    if(grp.endsWith('_assets')){ const key=src.uuid+'|'+grp; let m=cache[key];                                                         // موديل مستورد: خامته الأصلية مع إضاءة مخبوزة
+      if(!m){m=cache[key]=src.clone();m.envMapIntensity=.6;reg(m,envKey(grp),grp);patch(m,envKey(grp),false);}
+      o.material=m; }
+    else{ o.material=material(name,grp); if(name==='glass'||name==='curtain')o.renderOrder=2; }
+    if(name!=='curtain'){ if(g.index)g.setIndex(g.index.clone());          // المصدّر يشارك الفهارس بين القطع، وبناء شجرة الاصطدام يعيد ترتيبها
+      g.computeBoundsTree(); solid.push(o); } });
+  scene.add(gltf.scene);
+
+  /* ---- أبواب تنفتح عند الاقتراب ---- */
+  const ang=d=>Math.atan2(-d[1],d[0]), doors=[];
+  const doorMat={}, handleMat=new THREE.MeshStandardMaterial({color:0x0b0b0b,roughness:.35,metalness:.8});
+  const leafMat=lv=>{ if(doorMat[lv])return doorMat[lv]; const d=META.mats.wood, t=TX[d.t], ek=LV[lv];
+    const m=new THREE.MeshStandardMaterial({color:new THREE.Color().setRGB(...d.c),roughness:d.r,map:t.d,roughnessMap:t.arm,normalMap:t.n,envMapIntensity:1.5}); m.normalScale.set(d.n,d.n);
+    reg(m,ek); patch(m,ek,true); return doorMat[lv]=m; };
+  for(const d of META.doors){ const g=new THREE.Group(); g.position.set(d.x,d.z+0.006,d.s);
+    const geo=new THREE.BoxGeometry(d.w,d.h-0.006,0.04).translate(d.w/2,(d.h-0.006)/2,0), p=geo.attributes.position, nn=geo.attributes.normal, uv=geo.attributes.uv;
+    for(let i=0;i<p.count;i++){ if(Math.abs(nn.getZ(i))>.5)uv.setXY(i,p.getY(i),p.getX(i)); else uv.setXY(i,p.getY(i),p.getX(i)+p.getZ(i)); }   // عروق الخشب رأسية
+    const leaf=new THREE.Mesh(geo,leafMat(d.lv)); geo.computeBoundsTree(); g.add(leaf);
+    if(d.kind==='main')for(const sz of [-1,1])for(const [y0,y1] of [[.18,1.02],[1.2,2.72]]){ const pw=d.w-.2, frame=new THREE.Mesh(new THREE.BoxGeometry(pw,y1-y0,.012),leaf.material); frame.position.set(d.w/2,(y0+y1)/2,sz*.024); g.add(frame); const inner=new THREE.Mesh(new THREE.BoxGeometry(pw-.11,y1-y0-.11,.012),handleMat); inner.material=leaf.material; inner.position.set(d.w/2,(y0+y1)/2,sz*.031); g.add(inner); }
+    if(d.kind==='gate')for(let y=.14;y<d.h-.1;y+=.16)for(const sz of [-1,1]){ const r=new THREE.Mesh(new THREE.BoxGeometry(d.w-.02,.005,.002),handleMat); r.position.set(d.w/2,y,sz*.0205); g.add(r); }
+    for(const sz of [-1,1]){ const rose=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.05,0.012),handleMat); rose.position.set(d.w-0.075,1.0,sz*0.026); g.add(rose);
+      const lev=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.018,0.018),handleMat); lev.position.set(d.w-0.125,1.0,sz*0.05); g.add(lev);
+      const nk=new THREE.Mesh(new THREE.BoxGeometry(0.018,0.018,0.04),handleMat); nk.position.set(d.w-0.07,1.0,sz*0.04); g.add(nk); }
+    const a0=ang(d.closed); let a1=ang(d.open); if(a1-a0>Math.PI)a1-=2*Math.PI; if(a1-a0<-Math.PI)a1+=2*Math.PI;
+    g.rotation.y=a0; scene.add(g); g.updateMatrixWorld(true);
+    doors.push({g,leaf,a0,a1,t:0,want:0,lv:d.lv,cx:d.x+d.closed[0]*d.w/2,cz:d.s+d.closed[1]*d.w/2}); }
+  function doorStep(dt){ dyn.length=0; const lv=levelOf(P.y);
+    for(const d of doors){ const near=d.lv===lv?Math.hypot(P.x-d.cx,P.z-d.cz):99, want=near<2.1?1:near>2.9?0:d.want;
+      if(want!==d.want){d.want=want; sfx(want?'open':'shut');}
+      if(d.t!==d.want){ d.t=Math.max(0,Math.min(1,d.t+(d.want?1:-1)*dt/0.75)); const e=d.t*d.t*(3-2*d.t); d.g.rotation.y=d.a0+(d.a1-d.a0)*e; d.g.updateMatrixWorld(true); }
+      if(d.t<0.5)dyn.push(d.leaf); } }
+
+  /* ---- مرايا حقيقية (تُرسم فقط حين تكون في نفس الدور وقريبًا منها) ---- */
+  const mirrors=[];
+  if(Q.mirror){ const {Reflector}=await import('three/addons/objects/Reflector.js');
+    for(const q of META.mirrors){ const r=new Reflector(new THREE.PlaneGeometry(q.w,q.h),{textureWidth:Q.mirror,textureHeight:Q.mirror,clipBias:0.002,multisample:Q.fx?4:0});
+      r.position.set(q.x,q.z,q.s); r.rotation.y=Math.atan2(q.n[0],q.n[1]); r.visible=false; scene.add(r);
+      const dr=doors.filter(d=>d.lv===q.lv&&Math.hypot(d.cx-q.x,d.cz-q.s)<2.6).sort((a,b)=>Math.hypot(a.cx-q.x,a.cz-q.s)-Math.hypot(b.cx-q.x,b.cz-q.s))[0];
+      mirrors.push({r,q,door:dr||null}); } }      // المرآة خلف باب: لا تُرسم إلا والباب مفتوح أو وأنت داخل الحمام، لأن رسمها يكلّف مشهدًا كاملًا
+  scene.updateMatrixWorld(true);
+
+  /* ---- معالجة الصورة: توهج خفيف، تنعيم حواف، تدرّج ألوان ---- */
+  let composer=null, grade=null;
+  if(Q.fx){ const [{EffectComposer},{RenderPass},{UnrealBloomPass},{OutputPass},{ShaderPass}]=await Promise.all(['EffectComposer','RenderPass','UnrealBloomPass','OutputPass','ShaderPass'].map(f=>import(`three/addons/postprocessing/${f}.js`)));
+    composer=new EffectComposer(renderer,new THREE.WebGLRenderTarget(4,4,{type:THREE.HalfFloatType,samples:4}));
+    composer.addPass(new RenderPass(scene,cam)); composer.addPass(new UnrealBloomPass(new THREE.Vector2(4,4),0.13,0.5,1.2)); composer.addPass(new OutputPass());
+    grade=new ShaderPass({uniforms:{tDiffuse:{value:null}},
+      vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+      fragmentShader:`uniform sampler2D tDiffuse;varying vec2 vUv;
+        void main(){vec3 c=texture2D(tDiffuse,vUv).rgb; c=mix(c,c*c*(3.0-2.0*c),0.16); float l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,1.05);
+          c*=vec3(1.012,1.0,0.985); vec2 q=vUv-0.5; c*=1.0-dot(q,q)*0.34; gl_FragColor=vec4(c,1.0);}`});
+    composer.addPass(grade); }
+
+  /* ---- وضع الصورة: بانوراما مرسومة بتتبع الأشعة عند نقاط الوقوف، تظهر بطلب الزائر فقط حتى لا تتبدل الصورة أثناء التجول ---- */
+  const panoMat=new THREE.ShaderMaterial({uniforms:{map:{value:null},opacity:{value:0},gain:{value:+(QS.get('pg')||1)},fx:{value:Q.fx?1:0},res:{value:new THREE.Vector2(1,1)}},transparent:true,depthTest:false,depthWrite:false,side:THREE.BackSide,
+    vertexShader:'varying vec3 vD;void main(){vD=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader:'uniform sampler2D map;uniform float opacity;uniform float gain;uniform float fx;uniform vec2 res;varying vec3 vD;void main(){vec3 d=normalize(vD);vec2 uv=vec2(atan(d.z,d.x)*0.15915494+0.5,asin(clamp(d.y,-1.0,1.0))*0.31830989+0.5);vec3 c=texture2D(map,uv).rgb*gain;'
+      +'c=mix(c,c*c*(3.0-2.0*c),0.16*fx);float l=dot(c,vec3(.299,.587,.114));c=mix(vec3(l),c,1.0+0.05*fx);c*=mix(vec3(1.0),vec3(1.012,1.0,0.985),fx);vec2 q=gl_FragCoord.xy/res-0.5;c*=1.0-dot(q,q)*0.34*fx;gl_FragColor=vec4(c,opacity);}'});
+  const panoScene=new THREE.Scene(), panoMesh=new THREE.Mesh(new THREE.SphereGeometry(20,64,32),panoMat); panoScene.add(panoMesh);
+  const photo={spot:null,o:0,ready:false,out:false,near:null,tex:{}}, rings=[], snapEl=$('snap');
+  const ringMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.42,depthWrite:false,toneMapped:false});
+  for(const sp of META.spots||[]){ const r=new THREE.Mesh(new THREE.RingGeometry(0.17,0.2,48).rotateX(-Math.PI/2),ringMat); r.position.set(sp.x,FLOORS[sp.lv].h+0.03,sp.s); r.renderOrder=3; r.visible=false; scene.add(r); rings.push({r,sp}); }
+  const hasShot=sp=>(SHOTS[mode]||[]).includes(sp.k);
+  const shotTex=sp=>{ const key=mode+sp.k; if(photo.tex[key])return photo.tex[key];
+    return photo.tex[key]=new Promise((res,rej)=>tl.load(`${DIR}/photo/${mode==='night'?'n/':''}${MOBILE?'m/':''}${sp.k}.jpg${VER}`,t=>{t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;t.wrapS=THREE.RepeatWrapping;res(t);},undefined,rej)); };
+  function photoEnter(sp){ photo.spot=sp; photo.ready=false; photo.out=false; const m0=mode; shotTex(sp).then(t=>{ if(photo.spot===sp&&mode===m0){panoMat.uniforms.map.value=t;photo.ready=true;} }).catch(()=>{photo.out=true;}); }
+  function photoStep(dt,input){ const sp=photo.spot;
+    if(sp){ if(input||!hasShot(sp))photo.out=true;
+      if(!photo.out){ const k=Math.min(1,dt*7); P.x+=(sp.x-P.x)*k; P.z+=(sp.s-P.z)*k; if(photo.ready)photo.o=Math.min(1,photo.o+dt/0.8); }
+      else{ photo.o=Math.max(0,photo.o-dt/0.3); if(photo.o===0)photo.spot=null; } }
+    const lv=level, near=photo.spot||lv<0?null:(META.spots||[]).find(q=>q.lv===lv&&hasShot(q)&&Math.abs(P.y-FLOORS[lv].h)<0.1&&Math.hypot(P.x-q.x,P.z-q.s)<0.9)||null;
+    if(near!==photo.near){photo.near=near;snapEl.classList.toggle('on',!!near);}
+    $('shot').classList.toggle('on',!!photo.spot&&photo.o>0.6&&!photo.out); }
+  const snap=()=>{ if(photo.near&&!photo.spot)photoEnter(photo.near); };
+  snapEl.onclick=snap;
+
+  /* ---- الصوت: كله مولَّد في المتصفح ---- */
+  let AC=null, master=null, noiseBuf=null, amb=null;
+  function initSound(){ if(AC||!SND.ctx)return; AC=SND.ctx; master=AC.createGain(); master.gain.value=0.55; master.connect(AC.destination);
+    noiseBuf=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate); const dd=noiseBuf.getChannelData(0); for(let i=0;i<dd.length;i++)dd[i]=Math.random()*2-1; }
+  const burst=(f,q,g,dur,type='bandpass',delay=0)=>{ const t=AC.currentTime+delay, s=AC.createBufferSource(); s.buffer=noiseBuf; s.loop=true; const fl=AC.createBiquadFilter(); fl.type=type; fl.frequency.value=f; fl.Q.value=q;
+    const gn=AC.createGain(); gn.gain.setValueAtTime(0,t); gn.gain.linearRampToValueAtTime(g,t+0.004); gn.gain.exponentialRampToValueAtTime(0.0001,t+dur); s.connect(fl).connect(gn).connect(master); s.start(t,Math.random()); s.stop(t+dur+0.02); };
+  const tone=(f0,f1,g,dur,delay=0,type='sine')=>{ const t=AC.currentTime+delay, o=AC.createOscillator(); o.type=type; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(f1,t+dur);
+    const gn=AC.createGain(); gn.gain.setValueAtTime(0,t); gn.gain.linearRampToValueAtTime(g,t+0.006); gn.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(gn).connect(master); o.start(t); o.stop(t+dur+0.02); };
+  function sfx(kind,surf){ if(!AC||!SND.on||AC.state!=='running')return; const r=0.85+Math.random()*0.3;
+    if(kind==='step'){ if(surf==='wood'){burst(420*r,1.1,0.10,0.09);tone(95,60,0.09,0.07);} else if(surf==='out'){burst(1500*r,0.8,0.045,0.07);tone(80,55,0.04,0.05);} else{burst(1150*r,1.4,0.07,0.06);burst(2600*r,2,0.02,0.03);tone(110,70,0.05,0.05);} }
+    else if(kind==='open'){burst(300,0.7,0.035,0.32,'lowpass');burst(3200,3,0.03,0.02);}
+    else if(kind==='shut'){burst(260,0.7,0.03,0.3,'lowpass');tone(120,55,0.12,0.11,0.62);burst(2400,3,0.035,0.025,'bandpass',0.62);}
+    else if(kind==='ding'){tone(1318.5,1318.5,0.08,1.3);tone(1046.5,1046.5,0.07,1.5,0.32);}
+    else if(kind==='hum'){tone(58,52,0.10,1.1,0,'triangle');burst(180,0.5,0.03,1.1,'lowpass');} }
+  function ambience(on){ if(!AC)return; if(amb){amb.g.gain.setTargetAtTime(on&&SND.on?amb.v:0,AC.currentTime,0.4);return;} if(!on)return;
+    const s=AC.createBufferSource(); s.buffer=noiseBuf; s.loop=true; const f=AC.createBiquadFilter(); f.type='lowpass'; f.frequency.value=170; const g=AC.createGain(); g.gain.value=0; s.connect(f).connect(g).connect(master); s.start();
+    amb={g,f,v:0.05}; g.gain.setTargetAtTime(SND.on?amb.v:0,AC.currentTime,0.8); }
+
+  /* ---- الحركة والاصطدام ---- */
+  const ray=new THREE.Raycaster(), o3=new THREE.Vector3(), d3=new THREE.Vector3(), dn=new THREE.Vector3(0,-1,0), RAD=0.3; ray.firstHitOnly=true;
+  const blocked=(x,z,dx,dz,len)=>{ d3.set(dx,0,dz).normalize(); const px=-d3.z*0.17, pz=d3.x*0.17;      // ثلاثة أشعة بعرض الكتفين، فلا ينحشر بين قطع الأثاث
+    for(const h of [0.55,1.25])for(const k of [0,1,-1]){ray.set(o3.set(x+px*k,P.y+h,z+pz*k),d3);ray.far=len+RAD;if(ray.intersectObjects(solid,false).length||(dyn.length&&ray.intersectObjects(dyn,false).length))return true;} return false; };
+  const floorAt=(x,z)=>{ray.set(o3.set(x,P.y+0.8,z),dn);ray.far=3.5;const h=ray.intersectObjects(solid,false)[0];return h?h.point.y:null;};
+  const V={x:0,z:0}; let tipOff=false, drag=null, walked=0, still=0, liftBusy=false;
+  const tryMove=(mx,mz)=>{ const l=Math.hypot(mx,mz); if(l<1e-6||blocked(P.x,P.z,mx,mz,l))return false; const fy=floorAt(P.x+mx,P.z+mz);
+    if(fy===null||fy-P.y>0.25||fy-P.y<-1.2)return false; P.x+=mx;P.z+=mz;P.ty=fy;return true; };   // 0.25 م: يصعد الدرج ولا يصعد على الكنب
+  function move(dt){
+    const f=(keys.KeyW||keys.ArrowUp||fwdHold?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-JOY.my, s=(keys.KeyD?1:0)-(keys.KeyA?1:0)+JOY.mx, input=!!(f||s)&&!liftBusy;
+    if(JOY.lx||JOY.ly){ P.tyaw-=Math.sign(JOY.lx)*JOY.lx*JOY.lx*2.6*dt; P.tpitch=Math.max(-1.25,Math.min(1.25,P.tpitch-Math.sign(JOY.ly)*JOY.ly*JOY.ly*1.7*dt)); }
+    const turn=(keys.ArrowLeft||keys.KeyQ?1:0)-(keys.ArrowRight||keys.KeyE?1:0); P.tyaw+=turn*dt*1.9;
+    const kl=Math.min(1,dt*18); P.yaw+=(P.tyaw-P.yaw)*kl; P.pitch+=(P.tpitch-P.pitch)*kl;          // نظرة ناعمة
+    let tx=0,tz=0;
+    if(input){ if(!tipOff){tipOff=true;$('tip').classList.add('off');}
+      const sp=(keys.ShiftLeft||keys.ShiftRight?3.4:JOY.on?2.4:2.0)*Math.min(1,Math.hypot(f,s))/Math.hypot(f,s), sn=Math.sin(P.yaw), cs=Math.cos(P.yaw); tx=(-sn*f+cs*s)*sp; tz=(-cs*f-sn*s)*sp; }
+    const ka=Math.min(1,dt*(input?8:11)); V.x+=(tx-V.x)*ka; V.z+=(tz-V.z)*ka;                      // تسارع وتوقف تدريجيان
+    const dx=V.x*dt, dz=V.z*dt, x0=P.x, z0=P.z;
+    if(Math.hypot(dx,dz)>1e-5&&!(photo.spot&&!photo.out)){ if(!tryMove(dx,dz)){ if(!tryMove(dx,0)){ V.x=0; if(!tryMove(0,dz))V.z=0; } else V.z=0; } }
+    const moved=Math.hypot(P.x-x0,P.z-z0), speed=Math.hypot(V.x,V.z);
+    if(moved>1e-4&&input){ const b=Math.floor(walked/0.68); walked+=moved; if(Math.floor(walked/0.68)!==b)sfx('step',surface()); }
+    still=input||speed>0.08?0:still+dt;
+    P.bob=Math.sin(walked/0.68*Math.PI*2)*0.013*Math.min(1,speed/2);
+    if(P.ty===undefined||P.ty===null)P.ty=floorAt(P.x,P.z)??P.y;
+    P.y+=(P.ty-P.y)*Math.min(1,dt*11);
+    doorStep(dt); photoStep(dt,input);
+  }
+  let lastRoom=null;
+  const surface=()=>lastRoom==='الحديقة'||lastRoom==='السطح'?'out':/غرفة نوم|غرفة النوم|الملابس/.test(lastRoom||'')?'wood':'stone';
+  canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture?.(e.pointerId);canvas.focus();});
+  canvas.addEventListener('pointermove',e=>{if(!drag)return;P.tyaw+=(e.clientX-drag.x)*0.0042;P.tpitch=Math.max(-1.25,Math.min(1.25,P.tpitch+(e.clientY-drag.y)*0.0036));drag={x:e.clientX,y:e.clientY};});
+  ['pointerup','pointercancel'].forEach(k=>canvas.addEventListener(k,()=>drag=null));
+  addEventListener('keydown',e=>{if(!running)return;keys[e.code]=true;if(e.code.startsWith('Arrow')||e.code==='Space')e.preventDefault();
+    if(liftEl.classList.contains('on')&&/^Digit[1-3]$/.test(e.code))liftGo(+e.code[5]-1);
+    if(e.code==='KeyF'||e.code==='Enter')snap();});
+  addEventListener('keyup',e=>{keys[e.code]=false;}); addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
+  /* ---- عصا المشي في الجوال مثل يد الألعاب، والنظر بسحب الإصبع على الشاشة ---- */
+  const stick=(el,set)=>{ const knob=el.querySelector('i'); let id=null;
+    const upd=e=>{ const r=el.getBoundingClientRect(), R=r.width*.36; let dx=e.clientX-(r.left+r.width/2), dy=e.clientY-(r.top+r.height/2); const m=Math.hypot(dx,dy); if(m>R){dx*=R/m;dy*=R/m;}
+      knob.style.transform=`translate(${dx}px,${dy}px)`; let x=dx/R, y=dy/R; const k=Math.hypot(x,y); if(k<.14){x=0;y=0;} else {const q=(k-.14)/.86/k; x*=q; y*=q;} set(x,y); };
+    el.addEventListener('pointerdown',e=>{ if(id!==null)return; id=e.pointerId; try{el.setPointerCapture(id);}catch(_){} el.classList.add('on'); JOY.on=true; upd(e); e.preventDefault(); });
+    el.addEventListener('pointermove',e=>{ if(e.pointerId===id)upd(e); });
+    const end=e=>{ if(e.pointerId!==id)return; id=null; el.classList.remove('on'); knob.style.transform=''; set(0,0); };
+    ['pointerup','pointercancel','lostpointercapture'].forEach(k=>el.addEventListener(k,end)); };
+  stick($('padL'),(x,y)=>{JOY.mx=x;JOY.my=y;});
+  const go=$('go'); go.addEventListener('pointerdown',e=>{fwdHold=true;go.setPointerCapture?.(e.pointerId);}); ['pointerup','pointercancel'].forEach(k=>go.addEventListener(k,()=>fwdHold=false));
+
+  /* ---- المصعد ---- */
+  const liftEl=$('lift'), liftBtns=FLOORS.map((F,i)=>{const b=document.createElement('button');b.textContent=F.name.replace('الدور ','').replace('الملحق ','');b.onclick=()=>liftGo(i);liftEl.append(b);return b;});
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  async function liftGo(i,quick){ if(liftBusy||i===level)return; liftBusy=true; const st=META.lift[i]; veil.classList.add('on'); sfx('hum'); await wait(quick?0:900);
+    Object.assign(P,{x:st.x,z:st.s,y:FLOORS[i].h,ty:FLOORS[i].h,yaw:st.yaw,tyaw:st.yaw,pitch:0,tpitch:0}); V.x=V.z=0; photo.spot=null; photo.o=0; grace=2; sfx('ding'); await wait(quick?0:350); veil.classList.remove('on'); liftBusy=false; }
+
+  /* ---- النهار والمساء ---- */
+  const nightBtn=$('night'), hasNight=(META.modes||[]).includes('night'); if(!hasNight)nightBtn.hidden=true;
+  async function setMode(m,quick){ if(m===mode||!hasNight&&m==='night')return; veil.classList.add('on'); const [set]=await Promise.all([loadSet(m),wait(quick?0:380)]);
+    const old=S; mode=m; S=set; scene.background=S.sky; for(const q of REG){q.m.envMap=S.env[q.ek]; if(q.grp)q.m.lightMap=S.LM[q.grp];} for(const q of FAR)q.color.copy(q.userData.base).multiplyScalar(m==='night'?.035:1);
+    if(!Q.fx)for(const t of Object.values(old.LM))t.dispose();          // الكرت الضعيف: مجموعة إضاءة واحدة في الذاكرة
+    let i=0; for(const t of Object.values(S.LM)){renderer.initTexture(t); if(++i%4===0)await wait(0);} grace=2;
+    if(photo.spot){photo.out=true;photo.o=0;} nightBtn.setAttribute('aria-pressed',m==='night'); nightBtn.textContent=m==='night'?'النهار':'المساء'; veil.classList.remove('on'); }
+  nightBtn.onclick=()=>setMode(mode==='day'?'night':'day');
+  const sndBtn=$('snd');
+  sndBtn.onclick=()=>{SND.on=!SND.on;sndBtn.setAttribute('aria-pressed',SND.on);ambience(running);};
+
+  /* ---- المخطط المصغّر واسم المكان ---- */
+  const miniImg=$('miniImg'), dot=$('dot'), miniT=$('miniT'), roomEl=$('room');
+  function hud(){
+    const lv=levelOf(P.y), F=FLOORS[lv];
+    if(lv!==level){level=lv;miniImg.src=F.img;miniT.textContent=F.name;liftBtns.forEach((b,i)=>b.disabled=i===lv);for(const q of rings)q.r.visible=false;}
+    dot.style.left=(F.px(P.x)*100)+'%'; dot.style.top=(F.py(P.z)*100)+'%'; dot.style.transform=`rotate(${-P.yaw}rad)`;
+    const hit=META.rooms.find(q=>q.k===F.k&&q.cells.some(c=>P.x>=c[0]-.12&&P.x<=c[1]+.12&&P.z>=c[2]-.12&&P.z<=c[3]+.12)), onStair=P.x>2.1&&P.x<4.5&&P.z>8.1&&P.z<15.55, inside=!!hit&&Math.abs(P.y-F.h)<.4;
+    const r=onStair&&Math.abs(P.y-F.h)>.12?'الدرج':hit?(NAMES[hit.name]||hit.name):lv===0?'الحديقة':'السطح';
+    if(r!==lastRoom){lastRoom=r;roomEl.textContent=r;}
+    const out=!hit, want=EXPO*(mode==='night'?(out?1.25:0.92):(out?0.56:1.0)); renderer.toneMappingExposure+=(want-renderer.toneMappingExposure)*0.06;
+    const st=META.lift[lv]; liftEl.classList.toggle('on',!liftBusy&&Math.abs(P.y-F.h)<0.2&&Math.hypot(P.x-st.dx,P.z-st.ds)<1.35);
+    for(const q of mirrors){ const dm=q.q.lv===lv?Math.hypot(P.x-q.q.x,P.z-q.q.s):99; q.r.visible=!!Q.mirror&&(dm<2.4||(q.door?q.door.t>0.02&&dm<6:dm<4.5)); }
+    for(const q of rings)q.r.visible=q.sp.lv===lv&&q.sp!==photo.spot&&hasShot(q.sp);
+    cull();
+    if(amb){amb.f.frequency.value=out?520:170;amb.v=out?0.085:0.05;}
+  }
+  // أثاث ونباتات الأدوار الأخرى لا تُرسم (الجدران والأسقف تبقى)، وعلى الدرج يظهر الدوران معًا
+  let cullKey=null;
+  function cull(){ const key=FLOORS.map(F=>Math.abs(P.y-F.h)<3.3?1:0).join('')+level; if(key===cullKey)return; cullKey=key; const on=l=>Math.abs(P.y-FLOORS[l].h)<3.3;
+    for(const h of HEAVY)h.o.visible=on(h.l)||h.plants;
+    for(const d of doors)d.g.visible=on(d.lv); }
+  function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.fov=w<h?78:68;cam.updateProjectionMatrix();if(composer){composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(w,h);} renderer.getDrawingBufferSize(panoMat.uniforms.res.value);}
+  addEventListener('resize',resize); resize();
+  const draw=()=>{ cam.position.set(P.x,P.y+1.62+(photo.spot&&!photo.out?0:P.bob),P.z); cam.rotation.set(P.pitch,P.yaw,0); hud(); const po=photo.o;
+    if(po<1){ if(composer&&Q.fx)composer.render(); else renderer.render(scene,cam); }
+    if(po>0){ panoMesh.position.copy(cam.position); panoMat.uniforms.opacity.value=po*po*(3-2*po); renderer.setRenderTarget(null); renderer.autoClear=po>=1; renderer.render(panoScene,cam); renderer.autoClear=true; } };
+  // تصوير الفيلم من العارض نفسه: كاميرا حرة (موضع ونقطة نظر بإحداثيات المخطط: شرق، جنوب، ارتفاع)، بلا حلقات والأبواب مفتوحة
+  function filmStage(w,h){ renderer.setPixelRatio(1); renderer.setSize(w,h,false); if(composer){composer.setPixelRatio(1);composer.setSize(w,h);} renderer.getDrawingBufferSize(panoMat.uniforms.res.value); }
+  function filmShot(c,l,stops,jx=0,jy=0){ const w=canvas.width,h=canvas.height; SHOTS.day=[]; SHOTS.night=[]; photo.spot=null; photo.o=0;
+    for(const d of doors)if(d.t!==1){d.t=d.want=1;d.g.rotation.y=d.a1;d.g.updateMatrixWorld(true);}
+    P.x=c[0]; P.z=c[1]; P.y=P.ty=c[2]-1.62; hud(); renderer.toneMappingExposure=Math.pow(2,stops);
+    cam.fov=56.1; cam.aspect=w/h; cam.position.set(c[0],c[2],c[1]); cam.lookAt(l[0],l[2],l[1]); cam.setViewOffset(w,h,jx,jy,w,h); cam.updateProjectionMatrix();
+    if(composer&&Q.fx)composer.render(); else renderer.render(scene,cam); }
+  // قبل إخفاء شاشة التحميل: رفع كل الخامات والهندسة إلى كرت الشاشة وتجهيز برامج الرسم، حتى لا تتجمد الصورة عند أول دخول لدور أو غرفة
+  async function warm(){ loadEl.textContent='تجهيز الإضاءة والخامات'; await wait(40);
+    const tex=new Set(); for(const q of REG)for(const k of ['map','normalMap','roughnessMap','aoMap','lightMap','metalnessMap','emissiveMap']){const t=q.m[k]; if(t&&t.isTexture&&t.image)tex.add(t);}
+    let i=0; for(const t of tex){ renderer.initTexture(t); if(++i%6===0)await wait(0); }
+    const off=[], fc=[]; mirrors.forEach((q,j)=>q.r.userData.skip=j>0);
+    scene.traverse(o=>{ if(!o.visible&&!o.userData.skip){o.visible=true;off.push(o);} if(o.isMesh&&o.frustumCulled){o.frustumCulled=false;fc.push(o);} });
+    cam.position.set(START.x,1.62,START.z); cam.rotation.set(0,START.yaw,0); cam.updateMatrixWorld();
+    if(composer&&Q.fx)composer.render(); else renderer.render(scene,cam);
+    for(const o of fc)o.frustumCulled=true; for(const o of off)o.visible=false; cullKey=null; }
+  // إن بقي الرسم بطيئًا تنزل الجودة درجة واحدة تلقائيًا (ولا ترجع، حتى لا تتبدل الصورة)
+  let slow=0, grace=3;
+  function stepDown(){ if(Q.fx){Q.fx=false;panoMat.uniforms.fx.value=0;} else if(Q.pr>1)Q.pr=1; else if(Q.mirror){Q.mirror=0;} else if(Q.pr>0.62)Q.pr=Math.max(0.6,Q.pr*0.8); else return;
+    renderer.setPixelRatio(Q.pr); resize(); grace=3; }
+  await warm();
+  const air=(t)=>{ const a=-.62+Math.sin(t*.07)*.34; return [10.2+Math.sin(a)*34, 21+Math.sin(t*.11)*1.5, 17+Math.cos(a)*34]; }, airTo=new THREE.Vector3(9.4,2.6,17.4), v0=new THREE.Vector3(), v1=new THREE.Vector3(); let stage='air', t0=performance.now(), flyT=0, fromP=null;
+  const paint=()=>{ if(composer&&Q.fx)composer.render(); else renderer.render(scene,cam); };
+  function airFrame(now){ const t=(now-t0)/1000, p=air(t); cam.fov=innerWidth<innerHeight?62:40; cam.updateProjectionMatrix(); cam.position.set(...p); cam.lookAt(airTo); for(const q of mirrors)q.r.visible=false; renderer.toneMappingExposure=EXPO*(mode==='night'?1.25:.6); paint(); }
+  function flyFrame(dt){ flyT=Math.min(1,flyT+dt/5.2); const e=flyT*flyT*flyT*(flyT*(6*flyT-15)+10), h=1.62+START.y; v0.set(...fromP).lerp(v1.set(START.x,h,START.z),e); v0.y+=Math.sin(e*Math.PI)*2.5*(1-e); cam.position.copy(v0);
+    const look=new THREE.Vector3().lerpVectors(airTo,new THREE.Vector3(START.x,h+.05,START.z-6),Math.min(1,e*1.1)); cam.lookAt(look); cam.fov=(innerWidth<innerHeight?62:40)+(((innerWidth<innerHeight?78:68))-(innerWidth<innerHeight?62:40))*e; cam.updateProjectionMatrix(); renderer.toneMappingExposure=EXPO*(mode==='night'?1.25:(.6-.04*e)); paint();
+    if(flyT>=1){ stage='walk'; reset(); running=true; ambience(true); canvas.focus(); $('tip').classList.remove('off'); } }
+  const fly=()=>{ if(stage!=='air')return; const p=air((performance.now()-t0)/1000); fromP=p; flyT=0; stage='fly'; document.querySelectorAll('.hud,.ctl,.mini,.pad,.feat').forEach(e=>e.style.visibility=''); };
+  const toAir=()=>{ closeFeat(); running=false; stage='air'; t0=performance.now(); document.querySelectorAll('.hud,.ctl,.mini,.pad,.feat').forEach(e=>e.style.visibility='hidden'); liftEl.classList.remove('on'); snapEl.classList.remove('on'); };
+  /* ---- أدوات العرض: المسارات، الخصوصية، الخامات ---- */
+  const sheet=$('sheet'), FB={path:$('fPath'),priv:$('fPriv'),fin:$('fFin')}; let FEAT=null, TOUR=null, pathGroup=null, privGroup=null, privView=null, privSave=null;
+  const PT={value:0}, LVN={g:'الأرضي',f:'الأول',r:'الملحق'};
+  const groundY=(x,z)=>{ray.set(o3.set(x,1.7,z),dn);ray.far=2.2;const hs=ray.intersectObjects(solid,false).filter(h=>h.point.y<.8);return hs.length?hs[0].point.y:.2;};   // the walked surface: below knee height, so neither furniture nor the ground under the floor
+  const lin=v=>v<=.0031308?v*12.92:1.055*Math.pow(v,1/2.4)-.055, css=c=>`rgb(${c.map(v=>Math.round(lin(v)*255)).join(',')})`;
+  // المسارات: مُختبرة بالمشي الفعلي من البوابة حتى المجلس أو الصالة
+  const PATHS=[
+    {id:'men',name:'ضيوف الرجال',note:'من البوابة عبر المدخل الرئيسي إلى مجلس الرجال',col:[.95,.70,.25],lane:-.21,end:'مجلس الرجال',pts:[[7.8,35.6],[7.8,33.0],[7.8,23.0],[7.8,20.0],[7.8,18.85],[10.2,18.95],[12.1,20.6]]},
+    {id:'women',name:'ضيوف النساء',note:'بابهن في سور الشارع، ثم الحديقة إلى مجلس النساء',col:[.88,.42,.55],lane:.21,end:'مجلس النساء',pts:[[15.35,36.1],[15.35,34.8],[15.4,33.4],[15.7,31.6],[15.75,26.0],[15.9,24.55],[16.1,23.5],[16.1,15.2],[12.4,15.0],[12.4,9.3],[10.2,9.2],[10.2,7.6],[10.1,7.05],[13.6,5.3]]},
+    {id:'family',name:'العائلة',note:'من الممر الجانبي إلى باب الصالة، بعيدًا عن المجالس',col:[.30,.72,.82],lane:0,end:'صالة العائلة',pts:[[17.0,30.0],[16.0,29.0],[16.0,24.6],[8.6,24.4],[1.6,24.3],[1.0,23.2],[1.0,16.2],[1.05,14.95],[2.6,14.95],[4.9,14.9],[7.95,14.8],[7.9,12.55],[7.0,11.75]]}];
+  function buildPaths(){ pathGroup=new THREE.Group();
+    for(const p of PATHS){ p.curve=new THREE.CatmullRomCurve3(p.pts.map(([x,z])=>new THREE.Vector3(x,0,z)),false,'centripetal',.5); const L=p.curve.getLength(), n=Math.ceil(L/.1), pos=[], au=[], av=[], idx=[];
+      for(let i=0;i<=n;i++){ const u=i/n, q0=p.curve.getPointAt(u), t=p.curve.getTangentAt(u), q={x:q0.x-t.z*p.lane,z:q0.z+t.x*p.lane}, y=groundY(q.x,q.z)+.028, sx=-t.z*.15, sz=t.x*.15;
+        pos.push(q.x+sx,y,q.z+sz,q.x-sx,y,q.z-sz); au.push(u*L,u*L); av.push(1,-1); if(i<n){const a=i*2; idx.push(a,a+1,a+2,a+1,a+3,a+2);} }
+      const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('aU',new THREE.Float32BufferAttribute(au,1)); g.setAttribute('aV',new THREE.Float32BufferAttribute(av,1)); g.setIndex(idx);
+      const m=new THREE.ShaderMaterial({uniforms:{uT:PT,uC:{value:new THREE.Vector3(...p.col)}},transparent:true,depthWrite:false,side:THREE.DoubleSide,
+        vertexShader:'attribute float aU;attribute float aV;varying float vU;varying float vV;void main(){vU=aU;vV=aV;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+        fragmentShader:'uniform float uT;uniform vec3 uC;varying float vU;varying float vV;void main(){float e=1.-smoothstep(.62,1.,abs(vV));float c=fract((vU-abs(vV)*.16-uT*.9)/.75);float ch=smoothstep(0.,.05,c)*(1.-smoothstep(.22,.3,c));gl_FragColor=vec4(uC,e*(.30+.62*ch));}'});
+      const mesh=new THREE.Mesh(g,m); mesh.renderOrder=3; pathGroup.add(mesh); }
+    scene.add(pathGroup); }
+  function tourStep(dt){ if(keys.KeyW||keys.KeyS||keys.KeyA||keys.KeyD||keys.ArrowUp||keys.ArrowDown||JOY.mx||JOY.my){TOUR=null;return;}
+    const T_=TOUR; T_.d=Math.min(T_.L,T_.d+1.2*dt); const u=T_.d/T_.L, q=T_.p.curve.getPointAt(u), a=T_.p.curve.getPointAt(Math.min(1,(T_.d+1.8)/T_.L));
+    if(Math.hypot(a.x-q.x,a.z-q.z)>.05){ const yaw=Math.atan2(-(a.x-q.x),-(a.z-q.z)); let d=yaw-P.tyaw; d=Math.atan2(Math.sin(d),Math.cos(d)); P.tyaw+=d*Math.min(1,dt*3); }
+    P.tpitch+=(-.06-P.tpitch)*Math.min(1,dt*2); P.x=q.x; P.z=q.z; P.ty=groundY(q.x,q.z); V.x=V.z=0;
+    if(T_.d>=T_.L){ TOUR=null; roomEl.textContent=T_.p.end; } }
+  function startTour(id){ const p=PATHS.find(q=>q.id===id); if(!p)return; if(stage==='priv')exitPriv(); showPaths(true); const s=p.curve.getPointAt(0), a=p.curve.getPointAt(Math.min(1,2/p.curve.getLength()));
+    Object.assign(P,{x:s.x,z:s.z,y:groundY(s.x,s.z),ty:groundY(s.x,s.z),yaw:Math.atan2(-(a.x-s.x),-(a.z-s.z)),pitch:-.06,tpitch:-.06}); P.tyaw=P.yaw; V.x=V.z=0; TOUR={p,L:p.curve.getLength(),d:0}; running=true; sheet.classList.remove('on'); }
+  function showPaths(on){ if(on&&!pathGroup)buildPaths(); if(pathGroup)pathGroup.visible=on; }
+  // الخصوصية: الدراسة تتجاهل الأشجار (أسوأ حال)، فتُخفى هنا أيضًا
+  const GREEN=[]; scene.traverse(o=>{ if(o.isMesh&&/^x_(green|plants)/.test(o.name)||o.isMesh&&o.parent&&/^x_(green|plants)/.test(o.parent.name))GREEN.push(o); });
+  const greens=on=>{ for(const o of GREEN)o.visible=on; };
+  const PV=META.privacy;
+  function buildPriv(){ privGroup=new THREE.Group(); privGroup.visible=false;
+    for(const w of PV.wins){ const m=new THREE.Mesh(new THREE.PlaneGeometry(w.b-w.a,w.z1-w.z0),new THREE.MeshBasicMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false})), mid=(w.a+w.b)/2, zc=(w.z0+w.z1)/2;
+      if(w.axis==='x')m.position.set(mid,zc,w.face); else {m.position.set(w.face,zc,mid); m.rotation.y=Math.PI/2;} m.renderOrder=4; m.userData.w=w; privGroup.add(m); }
+    scene.add(privGroup); }
+  function enterPriv(id){ if(!PV)return; if(!privGroup)buildPriv(); const v=PV.views.find(q=>q.id===id); if(!v)return; TOUR=null;
+    if(stage!=='priv'){ privSave={x:P.x,y:P.y,z:P.z,yaw:P.yaw,pitch:P.pitch,fov:cam.fov}; stage='priv'; running=false; }
+    privView=v; const dx=v.look[0]-v.cam[0], dy=v.look[1]-v.cam[1], dz=v.look[2]-v.cam[2]; P.yaw=P.tyaw=Math.atan2(-dx,-dz); P.pitch=P.tpitch=Math.atan2(dy,Math.hypot(dx,dz));
+    cam.fov=innerWidth<innerHeight?72:56; cam.updateProjectionMatrix(); greens(false); for(const h of HEAVY)h.o.visible=true; for(const d of doors)d.g.visible=true; for(const q of mirrors)q.r.visible=false;
+    let pr=0, prTot=0, rooms=new Set();
+    for(const m of privGroup.children){ const w=m.userData.w, s=w.v[id]||0, seen=s>.05; if(w.sens===2){prTot++; if(seen){pr++; rooms.add((NAMES[w.name]||w.name)+' ('+LVN[w.k]+')');}}
+      m.material.color.setHex(!seen?0x3fb68b:w.sens===2?0xe5484d:w.sens===1?0xf0a030:0x8aa0b8); m.material.opacity=seen?.42+.42*s:.32; }
+    privGroup.visible=true; roomEl.textContent=v.name;
+    for(const b of sheet.querySelectorAll('[data-view]'))b.setAttribute('aria-pressed',b.dataset.view===id);
+    const sum=sheet.querySelector('#privSum'); if(sum)sum.innerHTML=pr?`<strong>${ar(pr)} من ${ar(prTot)}</strong> نوافذ الغرف الخاصة تُرى من هنا: ${[...rooms].slice(0,5).join('، ')}${rooms.size>5?' وغيرها':''}.`:`<strong>لا شيء من الغرف الخاصة يُرى من هنا.</strong> النوافذ الملوّنة بالأخضر مستورة.`; }
+  function exitPriv(){ if(stage!=='priv')return; stage='walk'; greens(true); if(privGroup)privGroup.visible=false; Object.assign(P,{x:privSave.x,y:privSave.y,z:privSave.z,ty:privSave.y,yaw:privSave.yaw,tyaw:privSave.yaw,pitch:privSave.pitch,tpitch:privSave.pitch}); cam.fov=privSave.fov; cam.updateProjectionMatrix(); cullKey=null; lastRoom=null; running=true; }
+  function privFrame(dt){ const k=Math.min(1,dt*10); P.yaw+=(P.tyaw-P.yaw)*k; P.pitch+=(P.tpitch-P.pitch)*k; cam.position.set(...privView.cam); cam.rotation.set(P.pitch,P.yaw,0);
+    renderer.toneMappingExposure=EXPO*(mode==='night'?1.25:.62); PT.value+=dt; paint(); }
+  // الخامات: لون كل غرفة على حدة، وباقة تشطيب للبيت كله. الإضاءة مخبوزة بلا لون، فيبقى الضوء صحيحًا مع أي لون
+  const TINT={value:Array.from({length:64},()=>new THREE.Vector3(1,1,1))}, CHOICE={}, ORIG={}, TXS={};
+  const BASECOL={warm:[.76,.695,.61],calm:[.82,.80,.77],lux:[.64,.58,.51]}, PKG={warm:'دافئة',calm:'هادئة',lux:'فخمة'}; let pkg='warm';
+  const PAINTS=[['الأساسي',null],['أبيض دافئ',[.84,.82,.78]],['رمادي حجري',[.60,.59,.56]],['زيتوني',[.52,.56,.44]],['طيني',[.66,.49,.39]],['أزرق رمادي',[.50,.56,.62]]];
+  // خريطة الغرف من المخطط (٤ سم): كل نقطة على جدار تأخذ لون الغرفة التي يواجهها الجدار
+  const RMW=525, RMH=875, rm=new Uint8Array(RMW*RMH*3);
+  META.rooms.forEach((q,i)=>{ const L='gfr'.indexOf(q.k); for(const c of q.cells){ for(let y=Math.max(0,Math.floor(c[2]/.04));y<Math.min(RMH,Math.ceil(c[3]/.04));y++) for(let x=Math.max(0,Math.floor(c[0]/.04));x<Math.min(RMW,Math.ceil(c[1]/.04));x++) rm[(L*RMH+y)*RMW+x]=i+1; } });
+  const ROOMMAP=new THREE.DataTexture(rm,RMW,RMH*3,THREE.RedFormat,THREE.UnsignedByteType); ROOMMAP.magFilter=ROOMMAP.minFilter=THREE.NearestFilter; ROOMMAP.generateMipmaps=false; ROOMMAP.needsUpdate=true;
+  for(const [key,m] of Object.entries(cache)){ if(key.split('|')[0]!=='wall')continue; const ob=m.onBeforeCompile, ok=m.customProgramCacheKey;
+    m.onBeforeCompile=(sh,r)=>{ ob&&ob.call(m,sh,r); sh.uniforms.uTint=TINT; sh.uniforms.uRoomMap={value:ROOMMAP};
+      sh.vertexShader='varying vec3 vWp;\nvarying vec3 vWn;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n  vWp=(modelMatrix*vec4(transformed,1.)).xyz; vWn=mat3(modelMatrix)*objectNormal;');
+      sh.fragmentShader='uniform vec3 uTint[64];\nuniform sampler2D uRoomMap;\nvarying vec3 vWp;\nvarying vec3 vWn;\n'+sh.fragmentShader.replace('#include <map_fragment>',
+        '#include <map_fragment>\n  { vec3 q=vWp+normalize(vWn)*.09; int lv=q.y<4.15?0:(q.y<7.75?1:2); ivec2 t=ivec2(int(clamp(q.x/.04,0.,524.)),int(clamp(q.z/.04,0.,874.))+lv*875);\n    diffuseColor.rgb*=uTint[int(texelFetch(uRoomMap,t,0).r*255.+.5)]; }'); };
+    m.customProgramCacheKey=()=>(ok?ok.call(m):'')+'|room2'; m.needsUpdate=true; }
+  const roomIndex=()=>{ const lv=levelOf(P.y), F=FLOORS[lv]; if(Math.abs(P.y-F.h)>.4)return -1; return META.rooms.findIndex(q=>q.k===F.k&&q.cells.some(c=>P.x>=c[0]-.12&&P.x<=c[1]+.12&&P.z>=c[2]-.12&&P.z<=c[3]+.12)); };
+  function applyTints(){ const b=BASECOL[pkg]; for(const v of TINT.value)v.set(1,1,1); for(const [r,i] of Object.entries(CHOICE)){ const t=PAINTS[i][1]; if(t)TINT.value[+r+1].set(t[0]/b[0],t[1]/b[1],t[2]/b[2]); } }
+  const texFor=(t,sc)=>{ const key=t+'|'+sc; if(TXS[key])return TXS[key]; const o={}; for(const s of ['d','n','arm']){ const c=TX[t][s].clone(); c.repeat.set(sc,sc); c.needsUpdate=true; o[s]=c; } return TXS[key]=o; };
+  function setPkg(p){ const F=META.finishes||{};
+    for(const [key,m] of Object.entries(cache)){ const name=key.split('|')[0]; if(!F.lux||!F.lux[name]||!m.isMeshStandardMaterial)continue;
+      const o=ORIG[key]??={map:m.map,rm:m.roughnessMap,ao:m.aoMap,nm:m.normalMap,c:m.color.clone(),r:m.roughness,e:m.envMapIntensity,ns:m.normalScale.clone()}, alt=p==='warm'?null:F[p][name];
+      if(!alt){ m.map=o.map; m.roughnessMap=o.rm; m.aoMap=o.ao; m.normalMap=o.nm; m.color.copy(o.c); m.roughness=o.r; m.envMapIntensity=o.e; m.normalScale.copy(o.ns); }
+      else if(TX[alt.t]){ const t=texFor(alt.t,alt.scale); m.map=t.d; m.roughnessMap=t.arm; m.aoMap=t.arm; m.normalMap=alt.n>0?t.n:null; m.color.setRGB(...alt.c); m.roughness=alt.r; m.envMapIntensity=alt.e; m.normalScale.set(alt.n,alt.n); }
+      m.needsUpdate=true; }
+    pkg=p; applyTints(); renderFin(); }
+  function renderFin(){ if(FEAT!=='fin')return; const i=roomIndex(), b=BASECOL[pkg], nm=i>=0?(NAMES[META.rooms[i].name]||META.rooms[i].name):null, cur=i>=0?(CHOICE[i]||0):-1;
+    sheet.innerHTML=`<p class="lbl">${nm?'لون الجدران في '+nm:'ادخل غرفة لتغيير لون جدرانها'}</p><div class="sw" aria-disabled="${!nm}">${PAINTS.map((q,j)=>`<button data-paint="${j}" aria-pressed="${j===cur}" style="--c:${css(q[1]||b)}"><i></i>${q[0]}</button>`).join('')}</div>`+
+      `<p class="lbl">باقة التشطيب للبيت كله</p><div class="chips">${Object.entries(PKG).map(([k,n])=>`<button data-pkg="${k}" aria-pressed="${k===pkg}">${n}</button>`).join('')}</div><p>الأرضيات والخشب ولون الجدران معًا، والإضاءة تبقى كما هي.</p>`;
+    sheet.dataset.room=i; }
+  setInterval(()=>{ if(FEAT==='fin'&&+sheet.dataset.room!==roomIndex())renderFin(); },400);
+  // اللوحة
+  function openFeat(kind){ if(FEAT===kind){closeFeat();return;} closeFeat(); FEAT=kind; FB[kind].setAttribute('aria-pressed','true'); sheet.className='sheet on';
+    if(kind==='path'){ showPaths(true); sheet.innerHTML=PATHS.map(p=>`<div class="row"><i style="background:${css(p.col)}"></i><div><b>${p.name}</b><span>${p.note}</span></div><button data-tour="${p.id}">رافقهم</button></div>`).join(''); }
+    else if(kind==='priv'){ sheet.innerHTML=`<p class="lbl">انظر إلى البيت من الخارج</p><div class="chips">${PV.views.map(v=>`<button data-view="${v.id}" aria-pressed="false">${v.name.replace('من ','')}</button>`).join('')}</div><p id="privSum">اختر مكانًا، وتتلوّن النوافذ بما يُرى منها.</p><div class="legend"><span><i class="r"></i>غرفة خاصة تُرى</span><span><i class="a"></i>مكان مشترك يُرى</span><span><i class="n"></i>مجلس يُرى</span><span><i class="g"></i>مستورة</span></div>`; enterPriv('east'); }
+    else renderFin(); }
+  function closeFeat(){ if(stage==='priv')exitPriv(); TOUR=null; showPaths(false); FEAT=null; sheet.className='sheet'; for(const b of Object.values(FB))b.setAttribute('aria-pressed','false'); }
+  FB.path.onclick=()=>openFeat('path'); FB.priv.onclick=()=>openFeat('priv'); FB.fin.onclick=()=>openFeat('fin');
+  sheet.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; const d=b.dataset;
+    if(d.tour)startTour(d.tour); else if(d.view)enterPriv(d.view); else if(d.pkg)setPkg(d.pkg);
+    else if(d.paint){ const i=roomIndex(); if(i<0)return; CHOICE[i]=+d.paint; applyTints(); renderFin(); } });
+  window.__feat={PATHS,privFrame,tourStep,startTour,enterPriv,exitPriv,setPkg,openFeat,closeFeat,roomIndex,CHOICE,applyTints,TINT,get tour(){return TOUR;},get stage(){return stage;}};
+  toAir(); loadEl.classList.add('off'); $('enter').disabled=false; $('enter').textContent='ادخل الفيلا';
+  let last=performance.now();
+  (function frame(now){ requestAnimationFrame(frame); const raw=(now-last)/1000, dt=Math.min(.05,raw); last=now; if(stage==='air'){airFrame(now);return;} if(stage==='fly'){flyFrame(dt);return;} if(stage==='priv'){privFrame(dt);return;} if(!running)return; PT.value+=dt; if(TOUR)tourStep(dt);
+    if(!QF&&document.visibilityState==='visible'&&document.hasFocus()){ if(grace>0)grace-=raw; else if(raw<0.12&&still===0){ slow=Math.max(0,slow+(raw>0.03?1:-0.5)); if(slow>45){slow=0;stepDown();} } }   // يُحتسب أثناء المشي فقط، والصفحة ظاهرة
+    move(dt); draw(); })(last);
+  T={panoMat,sfx,P,V,keys,scene,renderer,floorAt,step:move,hud,draw,setMode,liftGo,doors,photo,mirrors,ambience,META,SHOTS,get mode(){return mode;},get level(){return level;},FX,Q,GPU,snap,stepDown,fly,toAir,initSound,get stage(){return stage;},HEAVY,cam,filmStage,filmShot};window.__villa=T;
+}
+boot().catch(e=>{console.error(e);loadEl.classList.remove('off');loadEl.textContent='تعذّر تحميل الفيلا. أعد تحميل الصفحة.';});
+</script>
+</body>
+</html>

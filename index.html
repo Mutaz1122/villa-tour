@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>بيتك قبل أن يُبنى</title>
+<meta name="description" content="نحوّل مخططات المعماري إلى نموذج ثلاثي الأبعاد بمقاساته الحقيقية، يتجول فيه العميل من الجوال قبل البناء.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f1f0ec;--ink:#17191f;--soft:#5d626d;--line:#8b909a;--rule:rgba(23,25,31,.12);--sun:#ff7a1a;--night:#101217}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.75 "IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3{font-family:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;font-weight:600;margin:0;letter-spacing:0}
+.wrap{width:min(1180px,calc(100% - 40px));margin-inline:auto}
+:focus-visible{outline:2px solid var(--sun);outline-offset:3px;border-radius:4px}
+
+/* header */
+.top{position:absolute;inset-inline:0;top:0;z-index:3}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+.brand{font:600 19px "Reem Kufi",sans-serif;text-decoration:none;direction:ltr}
+.top nav{display:flex;gap:26px;font-size:15.5px}
+.top nav a{text-decoration:none;color:var(--soft)}
+.top nav a:hover{color:var(--ink)}
+
+/* hero: the plan turns into the house */
+.hero{min-height:100svh;display:grid;align-items:center;padding:96px 0 48px}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:clamp(32px,6vw,96px);align-items:center}
+.hero h1{font-size:clamp(44px,6.4vw,86px);line-height:1.08;max-width:9.5em}
+.hero p.lead{margin:22px 0 0;font-size:clamp(17px,1.5vw,20px);color:var(--soft);max-width:31em}
+.cta{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin-top:34px}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;text-decoration:none;font-weight:500;font-size:17px;padding:14px 26px;border-radius:999px;transition:background .2s}
+.btn:hover{background:#000}
+.btn i{width:9px;height:9px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 4px rgba(255,122,26,.25)}
+.link{font-size:16px;color:var(--soft);text-underline-offset:6px;text-decoration-color:var(--rule)}
+.link:hover{color:var(--ink);text-decoration-color:currentColor}
+.note{margin-top:40px;font-size:14px;color:var(--line)}
+
+.compare{position:relative;margin:0;height:min(84svh,880px);aspect-ratio:1000/1736;border-radius:6px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(23,25,31,.45);background:#ddd;--x:50%;user-select:none;-webkit-user-select:none;touch-action:pan-y}
+.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.compare .plan{clip-path:inset(0 calc(100% - var(--x)) 0 0)}
+.compare .bar{position:absolute;top:0;bottom:0;left:var(--x);width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(23,25,31,.15);pointer-events:none}
+.compare .knob{position:absolute;top:50%;left:var(--x);width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.28);pointer-events:none;display:grid;place-items:center}
+.compare .knob::before{content:"";width:16px;height:16px;border-radius:50%;background:var(--sun)}
+.compare .tag{position:absolute;bottom:14px;font-size:13px;font-weight:500;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.92);pointer-events:none}
+.compare .tag.a{left:14px}.compare .tag.b{right:14px;background:rgba(23,25,31,.78);color:#fff}
+.compare input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:ew-resize;direction:ltr}
+.hint{margin-top:12px;font-size:13.5px;color:var(--line);text-align:center}
+
+/* inside the tour */
+section{padding:clamp(72px,10vw,128px) 0}
+.sec-h{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:44px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+.sec-h h2{font-size:clamp(32px,4vw,48px);line-height:1.15}
+.sec-h p{margin:0;color:var(--soft);max-width:30em;font-size:16.5px}
+.tools{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:clamp(18px,2.4vw,30px)}
+.tool img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:4px}
+.tool:first-child img{aspect-ratio:16/12.4}
+.tool h3{font-size:22px;margin-top:18px}
+.tool p{margin:6px 0 0;color:var(--soft);font-size:16px}
+.also{margin-top:36px;font-size:15.5px;color:var(--soft)}
+
+/* packages */
+.pk{background:#fff;border-block:1px solid var(--rule)}
+.calc{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:-12px 0 36px;font-size:16px}
+.calc label{color:var(--soft)}
+.calc .field{display:inline-flex;align-items:center;border:1px solid var(--rule);border-radius:999px;padding:4px 6px 4px 16px;background:var(--paper)}
+.calc input{width:110px;border:0;background:transparent;font:600 20px "IBM Plex Sans Arabic",sans-serif;color:var(--ink);padding:6px 10px;text-align:center;direction:ltr}
+.calc input:focus{outline:none}
+.calc .field:focus-within{border-color:var(--ink)}
+.calc span.u{color:var(--soft);padding-inline-start:4px}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,40px)}
+.plan-c img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:4px}
+.plan-c .head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-top:22px}
+.plan-c h3{font-size:26px}
+.price{font:600 clamp(34px,3.6vw,46px)/1 "Reem Kufi",sans-serif;white-space:nowrap}
+.price small{font:500 15px "IBM Plex Sans Arabic",sans-serif;color:var(--soft);margin-inline-start:6px}
+.total{margin-top:10px;font-size:15.5px;color:var(--soft)}
+.total b{color:var(--ink);font-weight:600;font-size:18px}
+.plan-c ul{list-style:none;margin:20px 0 0;padding:0;border-top:1px solid var(--rule)}
+.plan-c li{padding:11px 0;border-bottom:1px solid var(--rule);font-size:16px;display:flex;gap:12px;align-items:baseline}
+.plan-c li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--line);transform:translateY(-2px)}
+.plan-c.full li.plus::before{background:var(--sun)}
+.fine{margin-top:30px;font-size:14px;color:var(--line)}
+
+/* last call over the real render */
+.closer{position:relative;padding:0;color:#fff;background:var(--night)}
+.closer img{width:100%;height:min(78svh,760px);object-fit:cover;opacity:.92}
+.closer .over{position:absolute;inset:0;display:flex;align-items:flex-end;background:linear-gradient(0deg,rgba(10,11,15,.78),rgba(10,11,15,0) 58%)}
+.closer .over .wrap{padding-bottom:clamp(36px,6vw,72px);display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap}
+.closer h2{font-size:clamp(34px,4.6vw,60px);line-height:1.1;max-width:12em}
+.closer .btn{background:#fff;color:var(--ink)}
+.closer .btn:hover{background:var(--paper)}
+footer{background:var(--night);color:rgba(255,255,255,.55);font-size:14px;padding:26px 0 calc(26px + env(safe-area-inset-bottom))}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (max-width:900px){
+  .hero{padding-top:88px}
+  .hero .wrap{grid-template-columns:1fr}
+  .compare{height:auto;width:100%;max-width:520px;justify-self:center}
+  .tools{grid-template-columns:1fr}
+  .tool:first-child img{aspect-ratio:16/10}
+  .plans{grid-template-columns:1fr;gap:56px}
+  .sec-h{flex-direction:column;align-items:flex-start}
+  .top nav{gap:18px;font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <a class="brand" href="./">ProbTech</a>
+  <nav><a href="#inside">داخل الجولة</a><a href="#packages">الباقات</a><a href="tour.html">الجولة</a></nav>
+</div></header>
+
+<main>
+  <div class="hero"><div class="wrap">
+    <div>
+      <h1>من المخطط إلى بيت تمشي فيه</h1>
+      <p class="lead">نحوّل مخططات المعماري إلى نموذج ثلاثي الأبعاد بمقاساته الحقيقية، يتجول فيه عميلك من الجوال أو الكمبيوتر قبل أن يُبنى.</p>
+      <div class="cta">
+        <a class="btn" href="tour.html"><i></i>ادخل الجولة</a>
+        <a class="link" href="#packages">الباقات والأسعار</a>
+      </div>
+      <p class="note">الصورة والجولة من مشروع حقيقي: فيلا خاصة بدور أرضي وأول وملحق.</p>
+    </div>
+    <div>
+      <figure class="compare" id="compare">
+        <img src="home/cutaway.jpg" alt="الدور الأرضي من الأعلى في النموذج ثلاثي الأبعاد">
+        <img class="plan" src="home/plan.jpg" alt="مخطط الدور الأرضي من المعماري">
+        <span class="bar"></span><span class="knob"></span>
+        <span class="tag a">المخطط</span><span class="tag b">النموذج</span>
+        <input type="range" min="0" max="100" value="50" step=".1" aria-label="قارن المخطط بالنموذج">
+      </figure>
+      <p class="hint">اسحب لترى المخطط نفسه بيتًا.</p>
+    </div>
+  </div></div>
+
+  <section id="inside"><div class="wrap">
+    <div class="sec-h">
+      <h2>ما يجده عميلك داخل الجولة</h2>
+      <p>ثلاث أدوات لم نرها في جولات أخرى، صُمّمت للبيت السعودي.</p>
+    </div>
+    <div class="tools">
+      <article class="tool">
+        <img src="home/paths.jpg" alt="مسارات الضيوف والعائلة مرسومة على أرض الحوش" loading="lazy">
+        <h3>مسار الضيف ومسار العائلة</h3>
+        <p>طريق ضيوف الرجال وطريق ضيوف النساء وطريق العائلة مرسومة على الأرض، وزر يرافق كل واحد منهم إلى مجلسه.</p>
+      </article>
+      <article class="tool">
+        <img src="home/privacy.jpg" alt="نوافذ ملوّنة حسب ما يُرى منها من بيت الجار" loading="lazy">
+        <h3>ميزان الخصوصية</h3>
+        <p>من الشارع ومن بيوت الجيران: أي النوافذ تكشف غرفًا خاصة، وأيها مستورة.</p>
+      </article>
+      <article class="tool">
+        <img src="home/paint.jpg" alt="جدران مجلس بلون جديد مع بقاء الإضاءة" loading="lazy">
+        <h3>البوية والخامات مباشرة</h3>
+        <p>لون لكل غرفة، وباقة تشطيب للبيت كله، والإضاءة تبقى صحيحة مع أي اختيار.</p>
+      </article>
+    </div>
+    <p class="also">نهار وليل، مصعد بين الأدوار، وتعمل على الجوال والكمبيوتر من رابط واحد بلا تطبيق.</p>
+  </div></section>
+
+  <section class="pk" id="packages"><div class="wrap">
+    <div class="sec-h">
+      <h2>الباقات</h2>
+      <p>السعر لكل متر مربع من مسطح البناء.</p>
+    </div>
+    <div class="calc">
+      <label for="area">مسطح البناء</label>
+      <span class="field"><input id="area" type="number" inputmode="numeric" min="50" max="20000" step="10" value="600"><span class="u">م²</span></span>
+    </div>
+    <div class="plans">
+      <article class="plan-c">
+        <img src="home/room_empty.jpg" alt="مجلس مشطّب بلا أثاث" loading="lazy">
+        <div class="head"><h3>بدون أثاث</h3><div class="price">٢<small>ريال / م²</small></div></div>
+        <p class="total">لمسطح <span data-area>٦٠٠</span> م²: <b data-total="2">١٬٢٠٠ ريال</b></p>
+        <ul>
+          <li>نموذج مطابق لمخططات المعماري بمقاساتها</li>
+          <li>خامات حقيقية للأرضيات والجدران والواجهات</li>
+          <li>الحوش والحديقة والسور والمواقف</li>
+          <li>إضاءة النهار والليل</li>
+          <li>جولة تفاعلية على الجوال والكمبيوتر</li>
+          <li>المسارات وميزان الخصوصية والبوية والخامات</li>
+        </ul>
+      </article>
+      <article class="plan-c full">
+        <img src="home/room_full.jpg" alt="المجلس نفسه مؤثثًا" loading="lazy">
+        <div class="head"><h3>مع الأثاث</h3><div class="price">٣<small>ريال / م²</small></div></div>
+        <p class="total">لمسطح <span data-area>٦٠٠</span> م²: <b data-total="3">١٬٨٠٠ ريال</b></p>
+        <ul>
+          <li>كل ما في باقة بدون أثاث</li>
+          <li class="plus">أثاث لكل الغرف حسب مخطط الأثاث</li>
+          <li class="plus">ديكور ولوحات وإنارة</li>
+          <li class="plus">نباتات حقيقية داخل البيت وفي الحديقة</li>
+        </ul>
+      </article>
+    </div>
+    <p class="fine">الصورتان من الغرفة نفسها في المشروع: مشطّبة بلا أثاث، ثم مؤثثة.</p>
+  </div></section>
+
+  <section class="closer" aria-label="الجولة"><img src="home/aerial.jpg" alt="الفيلا من الأعلى بحوشها وحديقتها" loading="lazy">
+    <div class="over"><div class="wrap">
+      <h2>جرّبها بنفسك قبل أن تطلبها</h2>
+      <a class="btn" href="tour.html"><i></i>ادخل الجولة</a>
+    </div></div>
+  </section>
+</main>
+<footer><div class="wrap"><span>ProbTech</span><span>من المخطط إلى بيت تمشي فيه</span></div></footer>
+
+<script>
+// المقارنة: المخطط فوق النموذج، والمقبض يكشف بينهما
+const cmp=document.getElementById('compare'), rng=cmp.querySelector('input');
+const setX=v=>cmp.style.setProperty('--x',v+'%');
+rng.addEventListener('input',()=>setX(rng.value));
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches){ // حركة واحدة عند الفتح: المقبض يمر فيظهر التحول
+  let t0=null; const go=t=>{ t0??=t; const k=Math.min(1,(t-t0)/1600), e=1-Math.pow(1-k,3), v=88-38*e; setX(v); rng.value=v; if(k<1)requestAnimationFrame(go); };
+  addEventListener('load',()=>setTimeout(()=>requestAnimationFrame(go),350));
+}
+// حاسبة الباقات
+const AR='٠١٢٣٤٥٦٧٨٩', ar=n=>Math.round(n).toLocaleString('en-US').replace(/\d/g,d=>AR[d]).replace(/,/g,'٬');
+const area=document.getElementById('area');
+const calc=()=>{ const a=Math.max(0,+area.value||0); document.querySelectorAll('[data-area]').forEach(e=>e.textContent=ar(a)); document.querySelectorAll('[data-total]').forEach(e=>e.textContent=ar(a*+e.dataset.total)+' ريال'); };
+area.addEventListener('input',calc); calc();
+</script>
+</body>
+</html>
