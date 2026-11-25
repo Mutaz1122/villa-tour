@@ -3,19 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>الفيلا: جولة كاملة</title>
+<title>بُعد | جولة الفيلا</title>
+<meta name="theme-color" content="#0A0F1F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 120'%3E%3Crect width='130' height='120' rx='26' fill='%230A0F1F'/%3E%3Cpolygon points='62,18 98,39 62,60 26,39' fill='%2338E1FF'/%3E%3Cpolygon points='98,39 98,81 62,102 62,60' fill='%231478A6'/%3E%3Cpolygon points='26,39 62,60 62,102 26,81' fill='none' stroke='%23fff' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/", "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.8/build/index.module.js" } }
 </script>
 <style>
-:root{--ink:#1d2230;--soft:#6b7284;--sun:#ff7a1a}
+:root{--ink:#1d2230;--soft:#6b7284;--sun:#38E1FF}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{font-family:"Reem Kufi","Segoe UI",Tahoma,sans-serif;color:var(--ink);background:#f1f2f6;overflow:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+body{font-family:"Readex Pro","Segoe UI",Tahoma,sans-serif;color:var(--ink);background:#f1f2f6;overflow:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 :focus-visible{outline:2px solid var(--sun);outline-offset:4px;border-radius:2px}
 
@@ -43,7 +45,7 @@ canvas#c:active{cursor:grabbing}
 .where em.on{opacity:.9}
 .ctl{position:absolute;top:clamp(20px,4vh,40px);inset-inline-end:clamp(18px,4vw,48px);display:flex;gap:clamp(16px,2.4vw,30px);align-items:baseline}
 .ctl button{color:#fff;font-size:15.5px;text-shadow:0 1px 10px rgba(0,0,0,.6);box-shadow:0 1.5px 0 rgba(255,255,255,.7);padding-bottom:1px}
-.ctl button[aria-pressed="true"]{box-shadow:0 1.5px 0 var(--sun);color:#ffd9bd}
+.ctl button[aria-pressed="true"]{box-shadow:0 1.5px 0 var(--sun);color:#9AF0FF}
 .mini{position:absolute;inset-inline-end:clamp(14px,3vw,36px);bottom:clamp(14px,3vh,32px);width:clamp(150px,19vw,250px);background:rgba(255,255,255,.93);border-radius:6px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.35);direction:ltr}
 .mini img{display:block;width:100%}
 .mini i{position:absolute;width:13px;height:13px;margin:-6.5px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 3px rgba(255,122,26,.3)}
